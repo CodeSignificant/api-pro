@@ -1,7 +1,7 @@
 {
   "name": "codesignificant/api-pro",
   "description": "API PRO – Lightweight PHP REST API framework",
-  "type": "library",
+  "type": "project",
   "license": "MIT",
   "require": {
     "php": ">=7.4"
@@ -20,4 +20,5 @@
     ]
   }
 }
+
 
