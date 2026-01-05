@@ -1,0 +1,22 @@
+{
+  "name": "codesignificant/api-pro",
+  "description": "API PRO – Lightweight PHP REST API framework",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": ">=7.4"
+  },
+  "autoload": {
+    "files": [
+      "autoload.php"
+    ]
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "php vendor/CodeSignificant/api-pro/publish.php"
+    ],
+    "post-update-cmd": [
+      "php vendor/CodeSignificant/api-pro/publish.php"
+    ]
+  }
+}
