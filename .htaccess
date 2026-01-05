@@ -1,0 +1,29 @@
+# ===============================
+# API PRO - Apache Configuration
+# ===============================
+
+<IfModule mod_headers.c>
+    # --- CORS ---
+    Header always set Access-Control-Allow-Origin "https://apipro.4ss.in"
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept"
+    Header always set Access-Control-Allow-Credentials "true"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # --- Base path (change only if deployed in subfolder) ---
+    RewriteBase /
+
+    # --- OPTIONS preflight ---
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^ - [R=204,L]
+
+    # --- Ignore existing files and directories ---
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # --- Route all requests to index.php ---
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
