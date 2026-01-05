@@ -16,10 +16,13 @@ if (file_exists($settings)) {
 }
 
 /* Error handling */
-ini_set('log_errors', 1);
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+ini_set('log_errors', '1');
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
 ini_set('error_log', $ROOT . '/error.log');
+
+error_reporting(E_ALL);
+
 
 /* Load ApiPro core classes (from vendor) */
 $core = __DIR__ . '/Core';
