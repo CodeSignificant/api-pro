@@ -13,13 +13,17 @@
   },
   "scripts": {
     "post-install-cmd": [
-      "php api-pro/publish.php"
+      "php publish.php"
     ],
     "post-update-cmd": [
-      "php api-pro/publish.php"
+      "php publish.php"
     ]
-  }
+  },
+
+  "minimum-stability": "stable",
+  "prefer-stable": true
 }
+
 
 
 
