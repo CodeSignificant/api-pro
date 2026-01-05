@@ -13,12 +13,13 @@
   },
   "scripts": {
     "post-install-cmd": [
-      "php vendor/codesignificant/api-pro/publish.php"
+      "php api-pro/publish.php"
     ],
     "post-update-cmd": [
-      "php vendor/codesignificant/api-pro/publish.php"
+      "php api-pro/publish.php"
     ]
   }
 }
+
 
 
