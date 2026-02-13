@@ -10,7 +10,7 @@ define('APIPRO_AUTOLOADED', true);
 $ROOT = getcwd();
 
 /* Load project settings */
-$settings = $ROOT . '/setting.properties.php';
+$settings = $ROOT . '/settings.properties.php';
 if (file_exists($settings)) {
     require_once $settings;
 }
@@ -32,3 +32,4 @@ require_once $core . '/Token.php';
 require_once $core . '/ProSql.php';
 require_once $core . '/ProNode.php';
 require_once $core . '/DataResponse.php';
+
