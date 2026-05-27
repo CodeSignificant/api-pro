@@ -4,26 +4,25 @@
   "type": "project",
   "license": "MIT",
   "require": {
-    "php": ">=7.4"
+    "php": ">=7.4",
+    "ext-redis": "*"
   },
   "autoload": {
     "files": [
-      "autoload.php"
+      "Core/autoload.php"
     ]
   },
   "scripts": {
     "post-install-cmd": [
-      "php publish.php"
+      "php post-install.php"
     ],
     "post-update-cmd": [
-      "php publish.php"
+      "php post-install.php"
+    ],
+    "start": [
+      "php -S [IP_ADDRESS] index.php"
     ]
   },
-
   "minimum-stability": "stable",
   "prefer-stable": true
 }
-
-
-
-

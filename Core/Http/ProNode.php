@@ -4,6 +4,42 @@ class ProNode {
     public static array $routes = [];
 
     // ===============================
+    // Auto-Discover Controllers via Attributes
+    // ===============================
+    public static function scan(string $directory): void
+    {
+        if (!is_dir($directory)) return;
+
+        foreach (glob($directory . '/*.php') as $file) {
+            require_once $file;
+
+            $className = basename($file, '.php');
+            if (!class_exists($className)) continue;
+
+            $refClass = new ReflectionClass($className);
+            $controllerAttrs = $refClass->getAttributes(Controller::class);
+            if (empty($controllerAttrs)) continue;
+
+            $basePath = rtrim($controllerAttrs[0]->newInstance()->basePath, '/');
+            $instance = new $className();
+
+            foreach ($refClass->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+                foreach ([Get::class, Post::class, Put::class, Patch::class, Delete::class] as $httpAttr) {
+                    $attrs = $method->getAttributes($httpAttr);
+                    if (empty($attrs)) continue;
+
+                    $httpMethod = strtoupper(basename(str_replace('\\', '/', $httpAttr)));
+                    $path = $attrs[0]->newInstance()->path;
+                    $fullPath = $basePath . '/' . ltrim($path, '/');
+
+                    self::$routes[$httpMethod][$fullPath] = [$instance, $method->getName()];
+                }
+            }
+        }
+    }
+
+
+    // ===============================
     // Utility Print Methods
     // ===============================
     public static function print($data = "ApiPro: Hello\n") {

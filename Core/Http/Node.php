@@ -9,7 +9,7 @@ $allowedOrigins = [
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
-if (in_array($origin, $allowedOrigins, true)) {
+if (isset($allowedOrigins) && in_array($origin, $allowedOrigins, true)) {
     header("Access-Control-Allow-Origin: $origin");
     header("Access-Control-Allow-Credentials: true");
 } else {
@@ -86,9 +86,9 @@ class Node {
      * $avatar = Node::getFiles(['avatar']);
      */
     public static function files(array $requiredKeys = []): array {
-        if (empty($_FILES)) return [];
-
         $files = [];
+
+        if (!empty($_FILES)) {
 
         foreach ($_FILES as $key => $file) {
             if (is_array($file['name'])) {
@@ -115,6 +115,7 @@ class Node {
                 ];
             }
         }
+        } // close if(!empty($_FILES))
 
         // Validate required file keys
         if (!empty($requiredKeys)) {

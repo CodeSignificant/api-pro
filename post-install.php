@@ -21,7 +21,6 @@ function publishIfMissing(string $src, string $dst): void
 }
 
 publishIfMissing("$packageRoot/index.php", "$projectRoot/index.php");
-publishIfMissing("$packageRoot/error.log", "$projectRoot/error.log");
-publishIfMissing("$packageRoot/settings.properties.php", "$projectRoot/settings.properties.php");
+publishIfMissing("$packageRoot/config.php", "$projectRoot/config.php");
 publishIfMissing("$packageRoot/.htaccess", "$projectRoot/.htaccess");
-publishIfMissing("$packageRoot/lib", "$projectRoot/lib");
+publishIfMissing("$packageRoot/lib/controllers", "$projectRoot/lib/controllers");
