@@ -59,6 +59,12 @@ class ProRepository
                 // Standard check existence
                 $checkQuery = "SHOW TABLES LIKE '$tableNameSafe'";
                 $existsRes = ProSql::FetchList($checkQuery);
+                
+                if (!$existsRes->isSuccess() && $existsRes->getMessage() === "Database connection is not available.") {
+                    // Database is offline or connection failed. Gracefully abort structural sync checks.
+                    break;
+                }
+                
                 $exists = ($existsRes->isSuccess() && !empty($existsRes->getData()));
 
                 if (!$exists) {
