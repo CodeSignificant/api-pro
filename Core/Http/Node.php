@@ -41,7 +41,7 @@ class Node {
         // Validate required keys
         foreach ($requiredKeys as $key) {
             if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
-                $err = new DataFailed("Missing or invalid value for '$key'", 400);
+                $err = new DataFailed("Missing or invalid values", 400);
                 $err->response();
             }
         }
@@ -119,7 +119,7 @@ class Node {
         if (!empty($requiredKeys)) {
             foreach ($requiredKeys as $key) {
                 if (!isset($files[$key]) || empty($files[$key]['name'])) {
-                    $err = new DataFailed("Missing required file: '$key'", 400);
+                    $err = new DataFailed("Missing required file", 400);
                     $err->response();
                 }
             }
