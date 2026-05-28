@@ -105,19 +105,19 @@ class ProTestService
                 }
 
                 // 4. Extract Optional Query Params via array access (e.g. $params['min_price'] or $_GET['min_price'])
-                preg_match_all("/(?:\\$[a-zA-Z0-9_]*params?|\\$_GET)\[['\"]([^'\"]+)['\"]\]/i", $code, $extraParams);
+                preg_match_all('/(?:\$[a-zA-Z0-9_]*params?|\$_GET)\[[\'\"]([^\'\"]+)[\'\"]\]/i', $code, $extraParams);
                 if (!empty($extraParams[1])) {
                     foreach ($extraParams[1] as $k) $query[] = trim($k);
                 }
 
                 // 5. Extract Optional Body Params via array access (e.g. $body['userId'] or $_POST['userId'])
-                preg_match_all("/(?:\\$[a-zA-Z0-9_]*body|\\$_POST)\[['\"]([^'\"]+)['\"]\]/i", $code, $extraBody);
+                preg_match_all('/(?:\$[a-zA-Z0-9_]*body|\$_POST)\[[\'\"]([^\'\"]+)[\'\"]\]/i', $code, $extraBody);
                 if (!empty($extraBody[1])) {
                     foreach ($extraBody[1] as $k) $body[] = trim($k);
                 }
 
                 // 6. Extract Optional Files via array access (e.g. $files['avatar'] or $_FILES['avatar'])
-                preg_match_all("/(?:\\$[a-zA-Z0-9_]*files?|\\$_FILES)\[['\"]([^'\"]+)['\"]\]/i", $code, $extraFiles);
+                preg_match_all('/(?:\$[a-zA-Z0-9_]*files?|\$_FILES)\[[\'\"]([^\'\"]+)[\'\"]\]/i', $code, $extraFiles);
                 if (!empty($extraFiles[1])) {
                     foreach ($extraFiles[1] as $k) $files[] = trim($k);
                 }

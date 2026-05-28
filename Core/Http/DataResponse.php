@@ -7,7 +7,7 @@ interface DataResponse {
     public function failed(): bool;
     public function isEmpty(): bool;
     public function getData();
-
+    public function getMessage(): string;
 }
 
 /**
@@ -50,6 +50,10 @@ class DataSuccess implements DataResponse {
     
     public function getData() {
         return $this->data;
+    }
+
+    public function getMessage(): string {
+        return $this->message;
     }
 
 
@@ -109,6 +113,10 @@ class DataFailed implements DataResponse {
     
     public function getData() {
         return $this->data;
+    }
+
+    public function getMessage(): string {
+        return $this->message;
     }
 
 

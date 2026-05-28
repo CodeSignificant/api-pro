@@ -923,8 +923,8 @@
                 const res = await fetch('/apipro/tester/routes');
                 const json = await res.json();
 
-                if (json.success) {
-                    renderSidebar(json.tree);
+                if (json.success && json.data && json.data.tree) {
+                    renderSidebar(json.data.tree);
                 } else {
                     document.getElementById('routesList').innerHTML = `<div style="color:#ef4444; padding:20px;">Failed to load routes</div>`;
                 }
