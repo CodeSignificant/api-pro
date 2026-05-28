@@ -16,14 +16,12 @@ class ProSql
                 self::$con = @new mysqli('p:' . DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
         
                 if (self::$con->connect_error) {
-                    error_log("Database Connection Failed: " . self::$con->connect_error);
                     self::$con = null;
                     return null;
                 }
         
                 self::$con->set_charset("utf8mb4");
             } catch (Throwable $e) {
-                error_log("Database Connection Failed Exception: " . $e->getMessage());
                 self::$con = null;
                 return null;
             } finally {
