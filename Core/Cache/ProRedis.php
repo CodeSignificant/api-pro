@@ -57,4 +57,34 @@ class ProRedis
     {
         return self::connect();
     }
+
+    public static function get(string $key)
+    {
+        $redis = self::instance();
+        return $redis ? $redis->get($key) : false;
+    }
+
+    public static function set(string $key, $value, ?int $ttl = null): bool
+    {
+        $redis = self::instance();
+        if (!$redis) return false;
+        if ($ttl !== null) {
+            return $redis->setex($key, $ttl, $value);
+        }
+        return $redis->set($key, $value);
+    }
+
+    public static function del(string $key): int
+    {
+        $redis = self::instance();
+        return $redis ? $redis->del($key) : 0;
+    }
+
+    public static function keys(string $pattern): array
+    {
+        $redis = self::instance();
+        if (!$redis) return [];
+        $res = $redis->keys($pattern);
+        return is_array($res) ? $res : [];
+    }
 }

@@ -24,3 +24,16 @@ publishIfMissing("$packageRoot/index.php", "$projectRoot/index.php");
 publishIfMissing("$packageRoot/config.php", "$projectRoot/config.php");
 publishIfMissing("$packageRoot/.htaccess", "$projectRoot/.htaccess");
 publishIfMissing("$packageRoot/lib/controllers", "$projectRoot/lib/controllers");
+
+// Clean up all markdown (.md) files from the project root to ensure a clean install
+$rootFiles = scandir($projectRoot);
+if ($rootFiles !== false) {
+    foreach ($rootFiles as $file) {
+        if (pathinfo($file, PATHINFO_EXTENSION) === 'md') {
+            $filePath = "$projectRoot/$file";
+            if (is_file($filePath)) {
+                unlink($filePath);
+            }
+        }
+    }
+}

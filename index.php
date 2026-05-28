@@ -9,6 +9,6 @@ if (php_sapi_name() === 'cli-server') {
 require_once __DIR__ . '/Core/autoload.php';
 // require_once __DIR__ . '/vendor/autoload.php'; Uncomment when other packages used
 
-ProNode::scan(__DIR__ . '/lib/controllers');
+ProNode::scan(__DIR__ . '/lib/controller');
 
 ProNode::start();

@@ -41,9 +41,8 @@ class Node {
         // Validate required keys
         foreach ($requiredKeys as $key) {
             if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
-                http_response_code(400);
-                // echo json_encode(['error' => "Missing or invalid value for '$key'"]);
-                exit();
+                $err = new DataFailed("Missing or invalid value for '$key'", 400);
+                $err->response();
             }
         }
 
@@ -66,9 +65,8 @@ class Node {
         if (!empty($requiredKeys)) {
             foreach ($requiredKeys as $key) {
                 if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
-                    http_response_code(400);
-                    echo json_encode(['error' => "Missing or invalid value: '$key'"]);
-                    exit;
+                    $err = new DataFailed("Missing or invalid value: '$key'", 400);
+                    $err->response();
                 }
             }
         }
@@ -121,8 +119,8 @@ class Node {
         if (!empty($requiredKeys)) {
             foreach ($requiredKeys as $key) {
                 if (!isset($files[$key]) || empty($files[$key]['name'])) {
-                    http_response_code(400);
-                    exit(json_encode(['error' => "Missing required file: '$key'"]));
+                    $err = new DataFailed("Missing required file: '$key'", 400);
+                    $err->response();
                 }
             }
         }

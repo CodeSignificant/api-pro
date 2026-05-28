@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ApiPro Tester</title>
+    <title>ApiPro Tester - Interactive API Debugger</title>
+    <meta name="description" content="ApiPro Tester: A premium, fast, interactive developer cockpit for debugging, running, and analyzing ApiPro security middleware endpoints in real-time.">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap"
         rel="stylesheet">
@@ -263,6 +264,7 @@
             padding: 30px;
             overflow-y: auto;
             border-right: 1px solid var(--border-color);
+            min-width: 0;
         }
 
         .section-title {
@@ -379,6 +381,7 @@
             display: flex;
             flex-direction: column;
             background-color: var(--bg-color);
+            min-width: 0;
         }
 
         .response-header {
@@ -420,6 +423,8 @@
             font-family: 'Fira Code', monospace;
             font-size: 0.85rem;
             color: #a6accd;
+            white-space: pre-wrap;
+            word-break: break-all;
         }
 
         .string {
@@ -477,19 +482,167 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #64748b;
         }
+
+        /* Responsive Mobile Layout Rules */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 99;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .sidebar-backdrop.active {
+            display: block;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-hamburger {
+            display: none;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .mobile-hamburger:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                position: relative;
+                overflow-y: auto !important;
+                height: auto;
+            }
+
+            .workspace {
+                height: auto;
+                overflow: visible !important;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -320px;
+                top: 0;
+                bottom: 0;
+                width: 300px;
+                transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                z-index: 100;
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+            }
+
+            .sidebar.mobile-open {
+                left: 0;
+            }
+
+            .mobile-hamburger {
+                display: flex;
+            }
+
+            /* Stack workspace on mobile */
+            .workspace-content {
+                flex-direction: column;
+                height: auto;
+                overflow: visible !important;
+            }
+
+            .request-header {
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                background: rgba(30, 41, 59, 0.95) !important;
+                backdrop-filter: blur(10px);
+                border-bottom: 1px solid var(--border-color);
+                padding: 15px 20px;
+            }
+
+            .content-split {
+                flex-direction: column;
+                height: auto;
+                overflow: visible !important;
+            }
+
+            .form-area {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                flex: none;
+                height: auto;
+                max-height: none;
+                overflow-y: visible;
+                padding: 20px;
+            }
+
+            .response-area {
+                flex: none;
+                height: auto;
+                min-height: 400px;
+                overflow-y: visible;
+                padding: 0;
+            }
+
+            .response-body {
+                overflow-y: visible !important;
+                overflow-x: auto !important;
+                padding: 15px 20px;
+            }
+
+            .response-header {
+                padding: 15px 20px;
+            }
+        }
     </style>
 </head>
 
 <body>
 
+    <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="closeMobileSidebar()"></div>
+
     <div class="sidebar">
-        <div class="sidebar-header">
+        <div class="sidebar-header"
+            style="display:flex; align-items:center; justify-content:space-between; padding: 20px;">
             <div style="display:flex; align-items:center; gap:10px;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                 </svg>
                 <h1>ApiPro Tester</h1>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <button id="toggleAllBtn" onclick="toggleAllGroups()" title="Expand All Groups" style="
+                    background: transparent;
+                    border: 1px solid var(--border-color);
+                    color: var(--text-muted);
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s;
+                ">
+                    <svg id="toggleAllIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="7 13 12 18 17 13"></polyline>
+                        <polyline points="7 6 12 11 17 6"></polyline>
+                    </svg>
+                </button>
             </div>
         </div>
         <!-- Bearer Token Panel -->
@@ -607,11 +760,29 @@
 
     <div class="workspace">
         <div class="workspace-empty" id="emptyState">
+            <button class="mobile-hamburger" onclick="toggleMobileSidebar()" title="Toggle Sidebar"
+                style="margin-bottom: 15px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
             Select an endpoint from the sidebar to begin testing
         </div>
 
         <div class="workspace-content" id="activeState">
             <div class="request-header">
+                <button class="mobile-hamburger" onclick="toggleMobileSidebar()" title="Toggle Sidebar"
+                    style="margin-right: 15px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
                 <div class="endpoint-display">
                     <span class="method-badge" id="headerMethod">GET</span>
                     <span id="headerPath">/api/test</span>
@@ -654,6 +825,28 @@
                     <div class="response-header">
                         <span style="font-weight: 600; color: var(--text-muted);">Response</span>
                         <div style="display: flex; gap: 15px; align-items: center;">
+                            <button id="copyResponseBtn" onclick="copyResponse()" title="Copy Response" style="
+                                display: none;
+                                align-items: center;
+                                justify-content: center;
+                                background: rgba(255, 255, 255, 0.05);
+                                border: 1px solid var(--border-color);
+                                color: var(--text-muted);
+                                border-radius: 4px;
+                                padding: 4px 8px;
+                                font-size: 0.75rem;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                                font-weight: 600;
+                            ">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    style="margin-right: 4px;">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                Copy
+                            </button>
                             <span style="color: var(--text-muted); font-size: 0.8rem;" id="responseTime">0 ms</span>
                             <span class="status-pill status-200" id="responseStatus" style="display: none;">200
                                 OK</span>
@@ -790,6 +983,10 @@
                     header.classList.toggle('open', !isOpen);
                     body.classList.toggle('open', !isOpen);
                     header.querySelector('.accordion-chevron').classList.toggle('open', !isOpen);
+
+                    const anyOpen = Array.from(document.querySelectorAll('.accordion-body'))
+                        .some(b => b.classList.contains('open'));
+                    updateToggleAllIcon(anyOpen);
                 };
 
                 // Default open first group
@@ -833,6 +1030,11 @@
             document.getElementById('responseBody').innerHTML = 'Awaiting request...';
             document.getElementById('responseStatus').style.display = 'none';
             document.getElementById('responseTime').innerText = '';
+
+            const copyBtn = document.getElementById('copyResponseBtn');
+            if (copyBtn) copyBtn.style.display = 'none';
+
+            closeMobileSidebar();
 
             // Update Header
             const headerMethod = document.getElementById('headerMethod');
@@ -1032,6 +1234,16 @@
         }
 
         function renderResponse(status, statusText, time, data) {
+            lastResponseData = data;
+            const copyBtn = document.getElementById('copyResponseBtn');
+            if (copyBtn) {
+                copyBtn.style.display = 'flex';
+                copyBtn.innerHTML = `
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy
+                `;
+            }
+
             const statusEl = document.getElementById('responseStatus');
             statusEl.style.display = 'block';
             statusEl.innerText = `${status} ${statusText}`;
@@ -1076,6 +1288,97 @@
                 }
                 return '<span class="' + cls + '">' + match + '</span>';
             });
+        }
+
+        let lastResponseData = null;
+
+        function copyResponse() {
+            if (!lastResponseData) return;
+            const textToCopy = typeof lastResponseData === 'string'
+                ? lastResponseData
+                : JSON.stringify(lastResponseData, null, 4);
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const btn = document.getElementById('copyResponseBtn');
+                if (btn) {
+                    btn.innerHTML = `
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Copied!
+                    `;
+                    setTimeout(() => {
+                        btn.innerHTML = `
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            Copy
+                        `;
+                    }, 2000);
+                }
+            }).catch(err => {
+                alert("Failed to copy: " + err);
+            });
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.toggle('mobile-open');
+            if (backdrop) backdrop.classList.toggle('active');
+        }
+
+        function closeMobileSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.remove('mobile-open');
+            if (backdrop) backdrop.classList.remove('active');
+        }
+
+        function toggleAllGroups() {
+            const anyOpen = Array.from(document.querySelectorAll('.accordion-body'))
+                .some(body => body.classList.contains('open'));
+            const shouldExpand = !anyOpen;
+
+            const headers = document.querySelectorAll('.accordion-header');
+            const bodies = document.querySelectorAll('.accordion-body');
+
+            headers.forEach(header => {
+                const chevron = header.querySelector('.accordion-chevron');
+                if (shouldExpand) {
+                    header.classList.add('open');
+                    if (chevron) chevron.classList.add('open');
+                } else {
+                    header.classList.remove('open');
+                    if (chevron) chevron.classList.remove('open');
+                }
+            });
+
+            bodies.forEach(body => {
+                if (shouldExpand) {
+                    body.classList.add('open');
+                } else {
+                    body.classList.remove('open');
+                }
+            });
+
+            updateToggleAllIcon(shouldExpand);
+        }
+
+        function updateToggleAllIcon(anyOpen) {
+            const btn = document.getElementById('toggleAllBtn');
+            const icon = document.getElementById('toggleAllIcon');
+            if (!btn || !icon) return;
+
+            if (anyOpen) {
+                btn.title = "Collapse All Groups";
+                icon.innerHTML = `
+                    <polyline points="17 11 12 6 7 11"></polyline>
+                    <polyline points="17 18 12 13 7 18"></polyline>
+                `;
+            } else {
+                btn.title = "Expand All Groups";
+                icon.innerHTML = `
+                    <polyline points="7 13 12 18 17 13"></polyline>
+                    <polyline points="7 6 12 11 17 6"></polyline>
+                `;
+            }
         }
 
         // Init

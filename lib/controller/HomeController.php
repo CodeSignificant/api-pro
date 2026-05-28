@@ -4,13 +4,13 @@
 class HomeController
 {
     #[Get('/hello')]
-    public function hello($node)
+    public function hello()
     {
         return new DataSuccess('Welcome API PRO Rest API');
     }
 
     #[Post('/book-room')]
-    public function bookRoom($node)
+    public function bookRoom()
     {
         // Rate Limiting
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
@@ -19,7 +19,7 @@ class HomeController
         }
 
         // Parse body
-        $body = Node::body(['roomId']);
+        $body = Node::body(['roomId', 'remarks']);
         $roomId = $body['roomId'];
         $remarks = $body['remarks']??"";
         
@@ -42,7 +42,7 @@ class HomeController
     }
 
     #[Get('/search')]
-    public function searchRooms($node)
+    public function searchRooms()
     {
         // This will auto-generate a 'location' input in the UI
         $params = Node::params(['location']);
@@ -55,7 +55,7 @@ class HomeController
     }
 
     #[Post('/upload-avatar')]
-    public function uploadAvatar($node)
+    public function uploadAvatar()
     {
         // Auto-generates a text input for userId
         $body = Node::body(['userId']);
