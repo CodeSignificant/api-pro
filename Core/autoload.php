@@ -71,7 +71,7 @@ if (defined('TESTER_ENABLED') && TESTER_ENABLED === true) {
 
 /* Auto-load Controllers */
 spl_autoload_register(function ($class_name) use ($ROOT) {
-    $controllerFile = $ROOT . '/lib/controllers/' . $class_name . '.php';
+    $controllerFile = $ROOT . '/lib/controller/' . $class_name . '.php';
     if (file_exists($controllerFile)) {
         require_once $controllerFile;
     }

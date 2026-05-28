@@ -23,7 +23,7 @@ function publishIfMissing(string $src, string $dst): void
 publishIfMissing("$packageRoot/index.php", "$projectRoot/index.php");
 publishIfMissing("$packageRoot/config.php", "$projectRoot/config.php");
 publishIfMissing("$packageRoot/.htaccess", "$projectRoot/.htaccess");
-publishIfMissing("$packageRoot/lib/controllers", "$projectRoot/lib/controllers");
+publishIfMissing("$packageRoot/lib/controller", "$projectRoot/lib/controller");
 
 // Clean up all markdown (.md) files from the project root to ensure a clean install
 $rootFiles = scandir($projectRoot);
