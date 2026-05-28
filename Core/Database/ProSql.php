@@ -13,7 +13,7 @@ class ProSql
                 mysqli_report(MYSQLI_REPORT_OFF);
                 
                 // Persistent connection (note the "p:")
-                self::$con = new mysqli('p:' . DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+                self::$con = @new mysqli('p:' . DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
         
                 if (self::$con->connect_error) {
                     error_log("Database Connection Failed: " . self::$con->connect_error);
