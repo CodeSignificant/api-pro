@@ -25,11 +25,11 @@ class DataSuccess implements DataResponse {
     }
 
     public function toArray(): array {
-        $res = ['success' => true, 'message' => $this->message];
-        if ($this->data === null || $this->data === [] || $this->data === '') return $res;
-    
-        $data = is_object($this->data) ? (array)$this->data : $this->data;
-        return is_array($data) ? array_merge($res, $data) : $res + ['data' => $data];
+        return [
+            'success' => true,
+            'message' => $this->message,
+            'data' => $this->data
+        ];
     }
 
 
@@ -71,16 +71,19 @@ class DataSuccess implements DataResponse {
 class DataFailed implements DataResponse {
     private $message;
     private $statusCode;
+    private $data;
 
-    public function __construct(string $message = 'Request failed', int $statusCode = 200) {
+    public function __construct(string $message = 'Request failed', int $statusCode = 200, $data = null) {
         $this->message = $message;
         $this->statusCode = $statusCode;
+        $this->data = $data;
     }
 
     public function toArray(): array {
         return [
             'success' => false,
-            'message' => $this->message
+            'message' => $this->message,
+            'data' => $this->data
         ];
     }
 
@@ -105,7 +108,7 @@ class DataFailed implements DataResponse {
     }
     
     public function getData() {
-        return null;
+        return $this->data;
     }
 
 

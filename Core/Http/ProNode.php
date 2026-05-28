@@ -160,13 +160,8 @@ class ProNode {
         if ($response instanceof DataResponse) {
             $response->response();
         } else {
-            http_response_code(500);
-            header('Content-Type: application/json');
-            echo json_encode([
-                'success' => false,
-                'error' => 'Invalid or unsupported response type'
-            ], JSON_PRETTY_PRINT);
-            exit();
+            $err = new DataFailed('Invalid or unsupported response type', 500);
+            $err->response();
         }
     }
 }

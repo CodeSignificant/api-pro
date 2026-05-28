@@ -16,8 +16,13 @@ define('REDIS_PORT', 6379);
 define('REDIS_PASS', null);
 define('REDIS_DB', 0);
 
-// Internal Tools Security
 define('LOG_ENABLED', true);
 define('TESTER_ENABLED', true);
 define('LOG_VIEWER_PASSWORD', 'admin123');
 
+define('TOKEN_DRIVER', 'redis');                 
+define('TOKEN_MULTIPLE_DEVICE_LOGIN', true);
+define('TOKEN_MAX_DEVICES', 5);
+define('TOKEN_ALLOW_CONCURRENT', true);
+define('SESSION_TIME', 1800);
+define('DB_WRITE', 'update');                     // Global DB schema sync mode: 'create', 'force', 'update', or false to disable
