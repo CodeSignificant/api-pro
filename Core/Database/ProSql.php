@@ -5,19 +5,31 @@ class ProSql
     private static ?mysqli $con = null;
 
     /** Establish and return database connection */
-    private static function connect(): mysqli
+    private static function connect(): ?mysqli
     {
         if (self::$con === null) {
-            // Persistent connection (note the "p:")
-            self::$con = @new mysqli('p:' . DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
-    
-            if (self::$con->connect_error) {
-                error_log("Database Connection Failed: " . self::$con->connect_error);
-                header('HTTP/1.0 502 Bad Gateway');
-                exit("Database connection error. Please try again later.");
+            try {
+                // Disable strict exception throwing momentarily if we want to check connect_error safely
+                mysqli_report(MYSQLI_REPORT_OFF);
+                
+                // Persistent connection (note the "p:")
+                self::$con = new mysqli('p:' . DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+        
+                if (self::$con->connect_error) {
+                    error_log("Database Connection Failed: " . self::$con->connect_error);
+                    self::$con = null;
+                    return null;
+                }
+        
+                self::$con->set_charset("utf8mb4");
+            } catch (Throwable $e) {
+                error_log("Database Connection Failed Exception: " . $e->getMessage());
+                self::$con = null;
+                return null;
+            } finally {
+                // Restore default error reporting
+                mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
             }
-    
-            self::$con->set_charset("utf8mb4");
         }
     
         return self::$con;
@@ -47,8 +59,6 @@ class ProSql
     }
     
     public static function Escape($value) {
-        // If DB connection is global
-        
         $con = self::connect();
     
         if (is_null($value)) return "NULL";
@@ -63,7 +73,10 @@ class ProSql
             $value = stripslashes($value);
         }
     
-        return mysqli_real_escape_string($con, $value);
+        if ($con) {
+            return $con->real_escape_string($value);
+        }
+        return addslashes($value);
     }
 
 
@@ -72,10 +85,13 @@ class ProSql
     public static function Query($query)
     {
         $con = self::connect();
-        $result = mysqli_query($con, $query);
+        if (!$con) {
+            return new DataFailed("Database connection is not available.");
+        }
+        $result = $con->query($query);
 
         if (!$result) {
-            return new DataFailed("Query failed: " . mysqli_error($con));
+            return new DataFailed("Query failed: " . $con->error);
         }
 
         return new DataSuccess("Query executed successfully", $result);
@@ -84,14 +100,17 @@ class ProSql
     public static function FetchListed($query)
     {
         $con = self::connect();
-        $result = mysqli_query($con, $query);
+        if (!$con) {
+            return new DataFailed("Database connection is not available.");
+        }
+        $result = $con->query($query);
 
         if (!$result) {
-            return new DataFailed("Query failed: " . mysqli_error($con));
+            return new DataFailed("Query failed: " . $con->error);
         }
 
         $data = [];
-        while ($row = mysqli_fetch_assoc($result)) {
+        while ($row = $result->fetch_assoc()) {
             $data[] = $row;
         }
 
@@ -106,14 +125,17 @@ class ProSql
     public static function FetchList($query)
     {
         $con = self::connect();
-        $result = mysqli_query($con, $query);
+        if (!$con) {
+            return new DataFailed("Database connection is not available.");
+        }
+        $result = $con->query($query);
 
         if (!$result) {
-            return new DataFailed("Query failed: " . mysqli_error($con));
+            return new DataFailed("Query failed: " . $con->error);
         }
 
         $data = [];
-        while ($row = mysqli_fetch_assoc($result)) {
+        while ($row = $result->fetch_assoc()) {
             $data[] = $row;
         }
 
@@ -127,17 +149,20 @@ class ProSql
     public static function Fetch($query)
     {
         $con = self::connect();
-        $result = mysqli_query($con, $query);
+        if (!$con) {
+            return new DataFailed("Database connection is not available.");
+        }
+        $result = $con->query($query);
 
         if (!$result) {
-            return new DataFailed("Query failed: " . mysqli_error($con));
+            return new DataFailed("Query failed: " . $con->error);
         }
 
-        if (mysqli_num_rows($result) == 0) {
+        if ($result->num_rows == 0) {
             return new DataSuccess("Fetch successful", []);
         }
 
-        $item = mysqli_fetch_assoc($result);
+        $item = $result->fetch_assoc();
         return new DataSuccess("Fetch successful", $item);
     }
     
@@ -145,30 +170,36 @@ class ProSql
     public static function FetchItem($query)
     {
         $con = self::connect();
-        $result = mysqli_query($con, $query);
+        if (!$con) {
+            return new DataFailed("Database connection is not available.");
+        }
+        $result = $con->query($query);
 
         if (!$result) {
-            return new DataFailed("Query failed: " . mysqli_error($con));
+            return new DataFailed("Query failed: " . $con->error);
         }
 
-        if (mysqli_num_rows($result) == 0) {
+        if ($result->num_rows == 0) {
             return new DataFailed("No record found.", 404);
         }
 
-        $item = mysqli_fetch_assoc($result);
+        $item = $result->fetch_assoc();
         return new DataSuccess("Fetch successful", $item);
     }
 
     public static function Updated($query)
     {
         $con = self::connect();
-        $result = mysqli_query($con, $query);
+        if (!$con) {
+            return new DataFailed("Database connection is not available.");
+        }
+        $result = $con->query($query);
 
         if (!$result) {
-            return new DataFailed("Update failed: " . mysqli_error($con));
+            return new DataFailed("Update failed: " . $con->error);
         }
 
-        $affected = mysqli_affected_rows($con);
+        $affected = $con->affected_rows;
         if ($affected === 0) {
             return new DataFailed("Update executed, but no rows were changed.");
         }
@@ -179,13 +210,16 @@ class ProSql
     public static function Update($query)
     {
         $con = self::connect();
-        $result = mysqli_query($con, $query);
+        if (!$con) {
+            return new DataFailed("Database connection is not available.");
+        }
+        $result = $con->query($query);
 
         if (!$result) {
-            return new DataFailed("Update failed: " . mysqli_error($con));
+            return new DataFailed("Update failed: " . $con->error);
         }
 
-        $affected = mysqli_affected_rows($con);
+        $affected = $con->affected_rows;
         if ($affected === 0) {
             return new DataSuccess("Update executed, but no rows were changed.", []);
         }
@@ -198,6 +232,9 @@ class ProSql
     public static function FetchPaginated($table, $params, $condition = "1=1", $page = 1, $orderBy = [], $pageSize = 10)
     {
         $con = self::connect();
+        if (!$con) {
+            return new DataFailed("Database connection is not available.");
+        }
         $page = max(1, (int)$page);
         $pageSize = max(1, (int)$pageSize);
         $offset = ($page - 1) * $pageSize;
@@ -207,24 +244,17 @@ class ProSql
         $orderSql = "";
 
         if (!empty($orderBy)) {
-        
             if (!is_array($orderBy)) {
                 $orderBy = [$orderBy];
             }
-        
             $orderParts = [];
-        
             foreach ($orderBy as $order) {
-        
                 // Skip invalid input
                 if (!is_string($order) || $order === '') {
                     continue;
                 }
-        
                 $direction = "ASC";
                 $field = $order;
-        
-                // Direction from prefix
                 if ($order[0] === '+') {
                     $field = substr($order, 1);
                     $direction = "ASC";
@@ -232,44 +262,37 @@ class ProSql
                     $field = substr($order, 1);
                     $direction = "DESC";
                 }
-        
-                // ✅ allow only safe column aliases (NO SQL keywords)
                 $field = preg_replace('/[^a-zA-Z0-9_]/', '', $field);
-        
                 if ($field !== '') {
                     $orderParts[] = "$field $direction";
                 }
             }
-        
             if (!empty($orderParts)) {
                 $orderSql = " ORDER BY " . implode(", ", $orderParts);
             }
         }
 
-
-
         $query = "SELECT $params FROM $table WHERE $condition $orderSql LIMIT $offset, $pageSize";
-        // echo($query);
-        $result = mysqli_query($con, $query);
+        $result = $con->query($query);
 
         if (!$result) {
-            return new DataFailed("Query failed: " . mysqli_error($con));
+            return new DataFailed("Query failed: " . $con->error);
         }
 
         $data = [];
-        while ($row = mysqli_fetch_assoc($result)) {
+        while ($row = $result->fetch_assoc()) {
             $data[] = $row;
         }
 
         // Count query
         $countQuery = "SELECT COUNT(*) as total_count FROM $table WHERE $condition";
-        $countResult = mysqli_query($con, $countQuery);
+        $countResult = $con->query($countQuery);
 
         if (!$countResult) {
-            return new DataFailed("Count query failed: " . mysqli_error($con));
+            return new DataFailed("Count query failed: " . $con->error);
         }
 
-        $totalCountRow = mysqli_fetch_assoc($countResult);
+        $totalCountRow = $countResult->fetch_assoc();
         $totalCount = (int)$totalCountRow['total_count'];
         $totalPages = ceil($totalCount / $pageSize);
 
@@ -287,6 +310,9 @@ class ProSql
     public static function FetchPaginatedDebug($table, $params, $condition = "1=1", $page = 1, $orderBy = [], $pageSize = 10)
     {
         $con = self::connect();
+        if (!$con) {
+            return new DataFailed("Database connection is not available.");
+        }
         $page = max(1, (int)$page);
         $pageSize = max(1, (int)$pageSize);
         $offset = ($page - 1) * $pageSize;
@@ -298,15 +324,10 @@ class ProSql
             if (!is_array($orderBy)) {
                 $orderBy = [$orderBy];
             }
-    
             $orderParts = [];
-    
             foreach ($orderBy as $order) {
-    
                 $direction = "ASC";
                 $field = $order;
-    
-                // Direction prefix
                 if (strpos($order, "+") === 0) {
                     $field = substr($order, 1);
                     $direction = "ASC";
@@ -314,44 +335,38 @@ class ProSql
                     $field = substr($order, 1);
                     $direction = "DESC";
                 }
-    
-                // ✅ allow table.column format
                 $field = preg_replace('/[^a-zA-Z0-9_\.]/', '', $field);
-    
                 if (!empty($field)) {
                     $orderParts[] = "$field $direction";
                 }
             }
-    
             if (!empty($orderParts)) {
                 $orderSql = " ORDER BY " . implode(", ", $orderParts);
             }
         }
 
-
-
         $query = "SELECT $params FROM $table WHERE $condition $orderSql LIMIT $offset, $pageSize";
         echo($query);
-        $result = mysqli_query($con, $query);
+        $result = $con->query($query);
 
         if (!$result) {
-            return new DataFailed("Query failed: " . mysqli_error($con));
+            return new DataFailed("Query failed: " . $con->error);
         }
 
         $data = [];
-        while ($row = mysqli_fetch_assoc($result)) {
+        while ($row = $result->fetch_assoc()) {
             $data[] = $row;
         }
 
         // Count query
         $countQuery = "SELECT COUNT(*) as total_count FROM $table WHERE $condition";
-        $countResult = mysqli_query($con, $countQuery);
+        $countResult = $con->query($countQuery);
 
         if (!$countResult) {
-            return new DataFailed("Count query failed: " . mysqli_error($con));
+            return new DataFailed("Count query failed: " . $con->error);
         }
 
-        $totalCountRow = mysqli_fetch_assoc($countResult);
+        $totalCountRow = $countResult->fetch_assoc();
         $totalCount = (int)$totalCountRow['total_count'];
         $totalPages = ceil($totalCount / $pageSize);
 
