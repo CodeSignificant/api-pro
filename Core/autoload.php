@@ -6,7 +6,7 @@
 
 if (defined('APIPRO_AUTOLOADED')) return;
 define('APIPRO_AUTOLOADED', true);
-define('APIPRO_VERSION', '2.1.0');
+define('APIPRO_VERSION', '2.2.0');
 
 $ROOT = getcwd();
 
