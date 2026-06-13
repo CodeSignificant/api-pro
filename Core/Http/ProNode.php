@@ -112,6 +112,9 @@ class ProNode {
         // --- 3️⃣ Normalize path
         $path = strtok($_SERVER['REQUEST_URI'], '?') ?: '/';
         $path = preg_replace('/\/+/', '/', $path);
+        if ($path !== '/' && str_ends_with($path, '/')) {
+            $path = rtrim($path, '/');
+        }
 
         // --- 4️⃣ Match route
         $allMethods = self::$routes;

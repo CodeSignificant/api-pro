@@ -71,4 +71,35 @@ class HomeController
             'size' => $avatar['size'] . ' bytes'
         ]);
     }
+
+    #[Get('/encryption/default')]
+    public function encryptionDefault()
+    {
+        return new DataSuccess("Sample default encrypted response", [
+            'message' => 'This data is encrypted using global DATA_ENC key.',
+            'timestamp' => time(),
+            'random_number' => rand(1000, 9999)
+        ]);
+    }
+
+    #[Get('/encryption/custom')]
+    public function encryptionCustom()
+    {
+        // Encrypted with custom key 'custom_secret_key'
+        return new DataSuccess("Sample custom encrypted response", [
+            'message' => 'This data is encrypted using custom_secret_key.',
+            'timestamp' => time()
+        ], 200, 'custom_secret_key');
+    }
+
+    #[Get('/encryption/disabled')]
+    public function encryptionDisabled()
+    {
+        // Explicitly disabled encryption using empty string key override
+        return new DataSuccess("Sample unencrypted response", [
+            'message' => 'This data is NOT encrypted because encryption key is empty string.',
+            'timestamp' => time()
+        ], 200, '');
+    }
 }
+
