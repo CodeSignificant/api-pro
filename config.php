@@ -2,6 +2,8 @@
 
 define("VERSION", "1.0.0");
 define("SERVER_ENC", "apipro@4ss");
+define("DATA_ENC", "");
+
 
 define('DB_HOST', "localhost");
 define('DB_NAME', "xxxxxxxx");

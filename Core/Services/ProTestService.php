@@ -45,7 +45,7 @@ class ProTestService
             }
         }
 
-        return new DataSuccess('Routes fetched', ['tree' => $tree]);
+        return new DataSuccess('Routes fetched', ['tree' => $tree], 200, '');
     }
 
     private function extractParamsFromCode($instance, $methodName)

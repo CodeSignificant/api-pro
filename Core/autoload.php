@@ -6,6 +6,7 @@
 
 if (defined('APIPRO_AUTOLOADED')) return;
 define('APIPRO_AUTOLOADED', true);
+define('APIPRO_VERSION', '2.1.0');
 
 $ROOT = getcwd();
 
@@ -40,6 +41,8 @@ require_once $core . '/Security/Token.php';
 require_once $core . '/Security/TokenRepository.php';
 require_once $core . '/Security/TokenManager.php';
 require_once $core . '/Security/Session.php';
+require_once $core . '/Security/DataEncryption.php';
+
 require_once $core . '/Http/ProNode.php';
 require_once $core . '/Http/DataResponse.php';
 require_once $core . '/Cache/ProRedis.php';
@@ -71,7 +74,7 @@ if (defined('TESTER_ENABLED') && TESTER_ENABLED === true) {
 
 /* Auto-load Controllers */
 spl_autoload_register(function ($class_name) use ($ROOT) {
-    $controllerFile = $ROOT . '/lib/controllers/' . $class_name . '.php';
+    $controllerFile = $ROOT . '/lib/controller/' . $class_name . '.php';
     if (file_exists($controllerFile)) {
         require_once $controllerFile;
     }

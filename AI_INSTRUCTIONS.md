@@ -255,3 +255,68 @@ class AuthRepository extends Repository
 2. **Repository Lock (Class Scope)**: Pass `true` or `['lock' => true]` as the second argument to `parent::__construct($tables, true)` to lock all tables declared inside that repository class.
 3. **Table Lock (Table Scope)**: Define `'lock' => true` on an individual table configuration array to protect only that table.
 
+---
+
+## 8. Data Encryption Layer
+
+ApiPro features a dedicated symmetric data encryption layer. This encrypts the payload `"data"` key in all success/failed envelopes without changing the API contract.
+
+- **Configuration**: Set `define("DATA_ENC", "your_secret_key");` in `config.php`. If `DATA_ENC` is empty or undefined, data encryption is disabled by default.
+- **Custom Key / Bypass Overrides**: Both `DataSuccess` and `DataFailed` constructors accept a fourth optional parameter `$encryptionKey` (`?string $encryptionKey = null`):
+  1. **Null (Default)**: Uses the global `DATA_ENC` config. If configured, encrypts the data; otherwise, returns data as-is.
+  2. **Empty String `""`**: Explicitly disables encryption for this response (even if `DATA_ENC` is configured globally).
+  3. **Non-Empty String**: Encrypts the response data using this custom key.
+
+### Code Usage Examples:
+```php
+// 1. Default (uses global DATA_ENC key)
+return new DataSuccess("Message", $data);
+
+// 2. Explicitly unencrypted (passes empty string key override)
+return new DataSuccess("Message", $data, 200, '');
+
+// 3. Custom key encryption (uses 'custom_secret_key')
+return new DataSuccess("Message", $data, 200, 'custom_secret_key');
+```
+
+---
+
+## 9. Setup, Project Startup, and Local Execution
+
+### Local Development Server
+To start the local built-in PHP development server, run from the project root:
+```bash
+php -S 127.0.0.1:8000 index.php
+```
+Alternatively, you can run:
+```bash
+composer start
+```
+The server will be accessible at `http://127.0.0.1:8000`.
+
+### Setup Checklist
+1. **Initialize Workspace**: Run `composer install` to download dependencies and trigger post-install configuration mappings.
+2. **Environment Configuration**: Set credentials and encryption constants in `config.php`:
+   - `SERVER_ENC` (Tokens and session keys)
+   - `DATA_ENC` (Symmetric response data keys)
+   - Redis host and port config (`TOKEN_DRIVER => 'redis'`)
+   - Database sync modes (`DB_WRITE => 'update'` for dev, `DB_WRITE => false` for database-less or production mode)
+
+---
+
+## 10. ApiPro CLI Tool
+
+The framework includes a terminal CLI tool in the project root: `api-pro`.
+
+### Commands
+- **Check version**:
+  ```bash
+  php api-pro version
+  ```
+- **Update Framework**:
+  Downloads the latest release ZIP package from the official repository and securely updates the `Core/` framework directory, entry points (`index.php`, `.htaccess`), and dependencies while completely preserving your custom application code (`lib/`), configurations (`config.php`), and non-project folders:
+  ```bash
+  php api-pro update [version]
+  ```
+  *(Example: `php api-pro update 2.1.0` or simply `php api-pro update` to fetch the latest release).*
+

@@ -17,23 +17,23 @@ class ProLogService
         $password = defined('LOG_VIEWER_PASSWORD') ? LOG_VIEWER_PASSWORD : '';
 
         if (empty($password)) {
-            return new DataFailed('Log viewer password is not configured in settings.', 500);
+            return new DataFailed('Log viewer password is not configured in settings.', 500, null, '');
         }
 
         if ($body['password'] !== $password) {
-            return new DataFailed('Unauthorized. Invalid password.', 401);
+            return new DataFailed('Unauthorized. Invalid password.', 401, null, '');
         }
 
         $logPath = getcwd() . '/prolog.log';
 
         if (!file_exists($logPath)) {
-            return new DataSuccess('Log file is empty or does not exist.', ['logs' => '']);
+            return new DataSuccess('Log file is empty or does not exist.', ['logs' => ''], 200, '');
         }
 
         // Read the last 1000 lines of the log file to prevent massive memory consumption
         $lines = $this->tail($logPath, 1000);
         
-        return new DataSuccess('Logs retrieved successfully', ['logs' => $lines]);
+        return new DataSuccess('Logs retrieved successfully', ['logs' => $lines], 200, '');
     }
 
     private function tail($filepath, $lines = 100, $adaptive = true) {

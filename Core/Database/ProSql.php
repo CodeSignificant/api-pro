@@ -7,6 +7,10 @@ class ProSql
     /** Establish and return database connection */
     private static function connect(): ?mysqli
     {
+        if (!class_exists('mysqli')) {
+            return null;
+        }
+
         if (self::$con === null) {
             try {
                 // Disable strict exception throwing momentarily if we want to check connect_error safely

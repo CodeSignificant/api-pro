@@ -17,18 +17,20 @@ class DataSuccess implements DataResponse {
     private $data;
     private $message;
     private $statusCode;
+    private $encryptionKey;
 
-    public function __construct(string $message = 'Success', $data = null, int $statusCode = 200) {
+    public function __construct(string $message = 'Success', $data = null, int $statusCode = 200, ?string $encryptionKey = null) {
         $this->data = $data;
         $this->message = $message;
         $this->statusCode = $statusCode;
+        $this->encryptionKey = $encryptionKey;
     }
 
     public function toArray(): array {
         return [
             'success' => true,
             'message' => $this->message,
-            'data' => $this->data
+            'data' => DataEncryption::encrypt($this->data, $this->encryptionKey)
         ];
     }
 
@@ -76,18 +78,20 @@ class DataFailed implements DataResponse {
     private $message;
     private $statusCode;
     private $data;
+    private $encryptionKey;
 
-    public function __construct(string $message = 'Request failed', int $statusCode = 200, $data = null) {
+    public function __construct(string $message = 'Request failed', int $statusCode = 200, $data = null, ?string $encryptionKey = null) {
         $this->message = $message;
         $this->statusCode = $statusCode;
         $this->data = $data;
+        $this->encryptionKey = $encryptionKey;
     }
 
     public function toArray(): array {
         return [
             'success' => false,
             'message' => $this->message,
-            'data' => $this->data
+            'data' => DataEncryption::encrypt($this->data, $this->encryptionKey)
         ];
     }
 
