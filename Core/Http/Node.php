@@ -4,7 +4,8 @@ $allowedOrigins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://crm.4ss.in",
-    "https://crm.doland.in"
+    "https://crm.doland.in",
+    "https://hadmin-dev.4ss.in"
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
