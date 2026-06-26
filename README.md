@@ -245,6 +245,40 @@ This downloads the framework skeleton, configures autoload pathways, executes th
 
 ---
 
+## Release Notes & Updates
+
+### Version 2.3.0 Release Notes
+
+ApiPro `v2.3.0` focuses on modularizing the debugger tools, introducing global utility logging, and stabilizing the CLI update engine.
+
+- **Modular Developer Console**:
+  - Relocated the monolithic `logs.html` and `test.html` assets into organized subfolders (`Core/logs/` and `Core/tester/`) to maintain a clean workspace.
+  - Added an in-place highlight and find navigation system (browser-like `Ctrl+F` layout) with arrow cycle buttons and Enter/Shift+Enter keystroke navigation in the Logger console.
+  - Shortened and styled the timestamp toggle into a compact, space-saving clock icon toggle button.
+  - Automatically filters long absolute file directories and line number strings from PHP error logs to keep message outputs clean.
+- **Global Helper Logging**:
+  - Introduced the static helper class `Log` (e.g. `Log::info()`, `Log::warning()`, `Log::error()`) write-mapped directly to the error stream.
+  - Implemented automatic logging of incoming request methods/paths and corresponding response status codes.
+- **Payload Optimizations**:
+  - Configured `DataResponse` to completely omit the `"data"` field from final JSON responses when its value is `null`.
+  - Added text masking styles and autocomplete attributes to password fields to prevent browser autofill suggestions.
+- **Framework CLI Updater Improvements**:
+  - Overhauled `php api-pro update` to clear out outdated files before copying, eliminating old directory junk.
+  - Added a multi-layered downloader that tries `curl` first before falling back to native stream wrappers.
+  - Uses native PHP `ZipArchive` unpacking with a command-line `unzip` fallback.
+
+### How to Update an Installed Instance
+
+To update your existing ApiPro project to this latest release, execute the built-in updater command from your terminal:
+
+```bash
+php api-pro update 2.3.0
+```
+
+The updater will download the specified release, safely perform a fresh overwrite of the framework `Core/` directory, and verify your updated setup while keeping your custom `lib/` controllers/services and `config.php` files untouched.
+
+---
+
 ## License
 
 This project is open-source software licensed under the MIT License.
