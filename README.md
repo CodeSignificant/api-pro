@@ -232,16 +232,78 @@ The framework includes a CLI companion tool in the project root: `api-pro`.
   *(Example: `php api-pro update 2.1.0` or simply `php api-pro update` to fetch the latest release).*
 
 
-## Quick Installation
+## Installation Guide
 
-Initialize a brand new project using Composer:
+### Prerequisites
+Make sure your development server meets the following requirements:
+- **PHP**: Version 8.0 or higher.
+- **Extensions**: `pdo_mysql`, `openssl`, `redis` (or a compatible Redis library), and optionally `zip` (for framework updates).
+- **Composer**: PHP dependency manager.
+- **Services**: MySQL/MariaDB and Redis.
 
+### Option 1: Via Composer (Recommended)
+Create a brand new ApiPro project from the official skeleton:
 ```bash
 composer create-project codesignificant/api-pro my-new-api
 ```
+This command downloads the framework skeleton, initializes the correct configurations, performs post-install mappings, and cleans up temporary setup documentation for a production-ready folder structure.
 
-This downloads the framework skeleton, configures autoload pathways, executes the automatic installation script, and unlinks all markdown documentation files in the final workspace for a perfectly clean codebase.
+### Option 2: Direct Git Clone
+Clone the repository manually:
+```bash
+# Clone the repository
+git clone https://github.com/CodeSignificant/api-pro.git my-new-api
+cd my-new-api
 
+# Install dependencies and trigger post-install setup
+composer install
+```
+
+### Post-Installation Setup
+1. **Configure Environment**: Update `config.php` in the root directory with your MySQL DB, Redis, and MAILER settings.
+2. **Set up Web Server routing**:
+   - **Apache**: The preconfigured `.htaccess` file handles URL rewriting and routes requests to `index.php` out of the box. Ensure `mod_rewrite` is enabled.
+   - **Nginx**: Set your server block configuration to rewrite unmatched requests:
+     ```nginx
+     location / {
+         try_files $uri $uri/ /index.php?$query_string;
+     }
+     ```
+
+
+---
+
+## Release Notes & Updates
+
+### Version 2.3.0 Release Notes
+
+ApiPro `v2.3.0` focuses on modularizing the debugger tools, introducing global utility logging, and stabilizing the CLI update engine.
+
+- **Modular Developer Console**:
+  - Relocated the monolithic `logs.html` and `test.html` assets into organized subfolders (`Core/logs/` and `Core/tester/`) to maintain a clean workspace.
+  - Added an in-place highlight and find navigation system (browser-like `Ctrl+F` layout) with arrow cycle buttons and Enter/Shift+Enter keystroke navigation in the Logger console.
+  - Shortened and styled the timestamp toggle into a compact, space-saving clock icon toggle button.
+  - Automatically filters long absolute file directories and line number strings from PHP error logs to keep message outputs clean.
+- **Global Helper Logging**:
+  - Introduced the static helper class `Log` (e.g. `Log::info()`, `Log::warning()`, `Log::error()`) write-mapped directly to the error stream.
+  - Implemented automatic logging of incoming request methods/paths and corresponding response status codes.
+- **Payload Optimizations**:
+  - Configured `DataResponse` to completely omit the `"data"` field from final JSON responses when its value is `null`.
+  - Added text masking styles and autocomplete attributes to password fields to prevent browser autofill suggestions.
+- **Framework CLI Updater Improvements**:
+  - Overhauled `php api-pro update` to clear out outdated files before copying, eliminating old directory junk.
+  - Added a multi-layered downloader that tries `curl` first before falling back to native stream wrappers.
+  - Uses native PHP `ZipArchive` unpacking with a command-line `unzip` fallback.
+
+### How to Update an Installed Instance
+
+To update your existing ApiPro project to this latest release, execute the built-in updater command from your terminal:
+
+```bash
+php api-pro update 2.3.0
+```
+
+The updater will download the specified release, safely perform a fresh overwrite of the framework `Core/` directory, and verify your updated setup while keeping your custom `lib/` controllers/services and `config.php` files untouched.
 
 ---
 

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logger</title>
+    <meta name="description"
+        content="ApiPro Live Log Stream Dashboard: A premium developer console with live error tailing, search matching, and log flush utilities.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='4 17 10 11 4 5'/%3E%3Cline x1='12' y1='19' x2='20' y2='19'/%3E%3C/svg%3E">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/Core/logs/style.css">
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="title-area">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+            <span class="logo-text">Logger</span>
+            <div class="status-indicator" title="Connection Status">
+                <div class="status-dot" id="statusDot"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <!-- Show Time Toggle -->
+            <button id="showTimeToggle" class="btn-toggle" onclick="toggleTime()" title="Show/Hide Timestamps">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+            </button>
+
+            <!-- Search Logs input -->
+            <div class="search-container">
+                <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search logs...">
+                <span class="search-count" id="searchCount">0/0</span>
+                <button class="search-nav-btn" id="prevMatchBtn" onclick="prevMatch()" title="Previous match">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                </button>
+                <button class="search-nav-btn" id="nextMatchBtn" onclick="nextMatch()" title="Next match">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Password -->
+            <input type="text" id="passwordInput" class="password-input" placeholder="Password" autocomplete="off" />
+            <button id="connectBtn" class="btn" onclick="toggleConnection()">Connect</button>
+            <button class="btn btn-danger" onclick="clearLogs()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+                Clear
+            </button>
+        </div>
+    </div>
+
+    <div class="console-container">
+        <div class="console hide-timestamps" id="consoleOutput">Welcome to ApiPro Log Viewer.
+            Enter the password configured in config.php to view live logs.</div>
+    </div>
+
+    <script src="/Core/logs/app.js"></script>
+</body>
+
+</html>

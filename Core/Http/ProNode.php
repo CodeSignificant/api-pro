@@ -116,6 +116,21 @@ class ProNode {
             $path = rtrim($path, '/');
         }
 
+        // --- Log Incoming Request
+        if (defined('LOG_ENABLED') && LOG_ENABLED === true) {
+            if (!str_starts_with($path, '/apipro/') && $path !== '/logs.html' && $path !== '/test.html') {
+                $timestamp = date('Y-m-d H:i:s');
+                $inputData = '';
+                if ($method === 'POST' || $method === 'PUT' || $method === 'PATCH') {
+                    $rawInput = @file_get_contents('php://input');
+                    if (!empty($rawInput)) {
+                        $inputData = ' | Body: ' . trim(preg_replace('/\s+/', ' ', $rawInput));
+                    }
+                }
+                error_log("[$timestamp] [INFO] Request: $method $path$inputData");
+            }
+        }
+
         // --- 4️⃣ Match route
         $allMethods = self::$routes;
         $matchedRoute = null;
@@ -132,14 +147,18 @@ class ProNode {
 
         // --- 5️⃣ Route not found at all
         if (empty($allowedMethods)) {
-            self::respond(new DataFailed("Route not found: $method $path", 404));
+            $response = new DataFailed("Route not found: $method $path", 404);
+            self::logResponse($method, $path, $response);
+            self::respond($response);
             return;
         }
 
         // --- 6️⃣ Path found but wrong method
         if (!$matchedRoute) {
             header('Allow: ' . implode(', ', $allowedMethods));
-            self::respond(new DataFailed("Method Not Allowed for $path", 405));
+            $response = new DataFailed("Method Not Allowed for $path", 405);
+            self::logResponse($method, $path, $response);
+            self::respond($response);
             return;
         }
 
@@ -147,13 +166,27 @@ class ProNode {
         [$controller, $fn] = $matchedRoute;
 
         if (!method_exists($controller, $fn)) {
-            self::respond(new DataFailed("Internal Server Error: Method '$fn' not found in controller", 500));
+            $response = new DataFailed("Internal Server Error: Method '$fn' not found in controller", 500);
+            self::logResponse($method, $path, $response);
+            self::respond($response);
             return;
         }
 
         $node = new Node();
         $response = $controller->$fn($node);
+        self::logResponse($method, $path, $response);
         self::respond($response);
+    }
+
+    private static function logResponse(string $method, string $path, $response) {
+        if (defined('LOG_ENABLED') && LOG_ENABLED === true) {
+            if (!str_starts_with($path, '/apipro/') && $path !== '/logs.html' && $path !== '/test.html') {
+                $status = ($response instanceof DataResponse) ? $response->getStatusCode() : 500;
+                $level = ($status >= 400) ? 'ERROR' : 'INFO';
+                $timestamp = date('Y-m-d H:i:s');
+                error_log("[$timestamp] [$level] Response: $method $path - Status: $status");
+            }
+        }
     }
 
     // ===============================

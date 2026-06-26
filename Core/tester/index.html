@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ApiPro Tester - Interactive API Debugger</title>
+    <meta name="description"
+        content="ApiPro Tester: A premium, fast, interactive developer cockpit for debugging, running, and analyzing ApiPro security middleware endpoints in real-time.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2360a5fa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'/%3E%3C/svg%3E">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/Core/tester/style.css">
+</head>
+
+<body>
+
+    <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="closeMobileSidebar()"></div>
+
+    <div class="sidebar">
+        <div class="sidebar-header"
+            style="display:flex; align-items:center; justify-content:space-between; padding: 20px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <h1>ApiPro Tester</h1>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <button id="toggleAllBtn" onclick="toggleAllGroups()" title="Expand All Groups" style="
+                    background: transparent;
+                    border: 1px solid var(--border-color);
+                    color: var(--text-muted);
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s;
+                ">
+                    <svg id="toggleAllIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="7 13 12 18 17 13"></polyline>
+                        <polyline points="7 6 12 11 17 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <!-- Bearer Token Widget -->
+        <div id="tokenWidget" class="token-widget" style="display: none;">
+            <div class="token-widget-header">
+                <span>Bearer Token</span>
+                <button type="button" onclick="toggleTokenPanel()">×</button>
+            </div>
+            <div class="token-widget-body">
+                <input type="password" id="bearerTokenInput" placeholder="Enter Token..." oninput="saveToken()">
+                <button type="button" onclick="clearToken()">Clear</button>
+            </div>
+        </div>
+
+        <div class="routes-list" id="routesList">
+            <!-- Populated by JS -->
+            <div style="color:var(--text-muted); padding:20px; font-size:0.85rem;">Loading endpoints...</div>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+            <button type="button" class="btn-token" id="tokenBtn" onclick="toggleTokenPanel()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Token
+            </button>
+            <a href="/logs.html" target="_blank" class="btn-logs">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                Logs
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+        <!-- Empty State -->
+        <div class="workspace-empty" id="emptyState">
+            <div style="text-align: center;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 15px; opacity: 0.5;">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                <p>Select an endpoint from the sidebar to start testing</p>
+            </div>
+        </div>
+
+        <!-- Active State -->
+        <div class="workspace-content" id="activeState">
+            <!-- Header -->
+            <div class="request-header">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
+                        <button class="mobile-hamburger" onclick="toggleMobileSidebar()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
+                            </svg>
+                        </button>
+                        <div class="endpoint-display" style="flex: 1; min-width: 0;">
+                            <span class="method-badge" id="headerMethod">GET</span>
+                            <span id="headerPath"
+                                style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">/v1/user/profile</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Content Split -->
+            <div class="content-split">
+                <!-- Left: Request Form -->
+                <div class="form-area">
+                    <form id="requestForm" onsubmit="event.preventDefault(); sendRequest();">
+                        <!-- Query Parameters -->
+                        <div id="querySection" style="display: none; margin-bottom: 25px;">
+                            <h3 class="section-title">Query Parameters</h3>
+                            <div id="queryFields"></div>
+                        </div>
+
+                        <!-- Request Body (JSON or Form Fields) -->
+                        <div id="bodySection" style="display: none; margin-bottom: 25px;">
+                            <h3 class="section-title">Request Body</h3>
+                            <div id="bodyFields"></div>
+                        </div>
+
+                        <!-- File Parameters -->
+                        <div id="fileSection" style="display: none; margin-bottom: 25px;">
+                            <h3 class="section-title">Multipart Files</h3>
+                            <div id="fileFields"></div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px;">
+                            <button type="submit" class="send-btn" id="sendBtn" style="flex: 2;">
+                                <span>Send Request</span>
+                                <div class="loader" id="loader"></div>
+                            </button>
+                            <button type="button" class="send-btn" onclick="copyCurl()" style="
+                                flex: 1;
+                                background-color: rgba(255, 255, 255, 0.02);
+                                border: 1px solid var(--border-color);
+                                color: var(--text-main);
+                            ">
+                                cURL
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Right: Response Console -->
+                <div class="response-area">
+                    <div class="response-header">
+                        <span style="font-weight: 600; font-size: 0.95rem; color: var(--text-main);">Response</span>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <button id="copyResponseBtn" onclick="copyResponse()" style="
+                                display: none;
+                                align-items: center;
+                                justify-content: center;
+                                background: rgba(255, 255, 255, 0.05);
+                                border: 1px solid var(--border-color);
+                                color: var(--text-muted);
+                                border-radius: 4px;
+                                padding: 4px 8px;
+                                font-size: 0.75rem;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                                font-weight: 600;
+                            ">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    style="margin-right: 4px;">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                Copy
+                            </button>
+                            <span style="color: var(--text-muted); font-size: 0.8rem;" id="responseTime">0 ms</span>
+                            <span class="status-pill status-200" id="responseStatus" style="display: none;">200 OK</span>
+                        </div>
+                    </div>
+                    <!-- Response Tabs -->
+                    <div id="responseTabs" style="display: none; border-bottom: 1px solid var(--border-color); margin-bottom: 12px; gap: 16px;">
+                        <button type="button" id="tabBtnBody" onclick="switchResponseTab('body')" style="background: none; border: none; border-bottom: 2px solid var(--accent-color); color: var(--text-color); padding: 8px 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">Response Body</button>
+                        <button type="button" id="tabBtnHeaders" onclick="switchResponseTab('headers')" style="background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); padding: 8px 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">Response Headers</button>
+                    </div>
+                    <pre class="response-body" id="responseBody">Awaiting request...</pre>
+                    <pre class="response-body" id="responseHeaders" style="display: none; white-space: pre-wrap; font-family: 'Fira Code', monospace;"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/Core/tester/app.js"></script>
+</body>
+
+</html>

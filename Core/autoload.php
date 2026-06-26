@@ -6,7 +6,7 @@
 
 if (defined('APIPRO_AUTOLOADED')) return;
 define('APIPRO_AUTOLOADED', true);
-define('APIPRO_VERSION', '2.2.0');
+define('APIPRO_VERSION', '2.3.0');
 
 $ROOT = getcwd();
 
@@ -45,6 +45,7 @@ require_once $core . '/Security/DataEncryption.php';
 
 require_once $core . '/Http/ProNode.php';
 require_once $core . '/Http/DataResponse.php';
+require_once $core . '/Http/Log.php';
 require_once $core . '/Cache/ProRedis.php';
 require_once $core . '/Security/RateLimiter.php';
 require_once $core . '/Security/ProLock.php';
@@ -56,6 +57,7 @@ if (defined('LOG_ENABLED') && LOG_ENABLED === true) {
     $proLogService = ProNode::Service('/apipro/logs', new ProLogService());
     $proLogService->get('/viewer', 'viewer');
     $proLogService->post('/read', 'read');
+    $proLogService->post('/clear', 'clear');
 
     // Backward compatibility alias for the old URL
     $aliasLogService = ProNode::Service('', new ProLogService());
