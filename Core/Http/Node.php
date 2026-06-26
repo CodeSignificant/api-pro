@@ -1,16 +1,18 @@
 <?php
 
-$allowedOrigins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://crm.4ss.in",
-    "https://crm.doland.in",
-    "https://hadmin-dev.4ss.in"
-];
+$allowedOrigins = [];
+if (defined('CORS') && !empty(CORS)) {
+    $allowedOrigins = array_map('trim', explode(',', CORS));
+} else {
+    $allowedOrigins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000"
+    ];
+}
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
-if (isset($allowedOrigins) && in_array($origin, $allowedOrigins, true)) {
+if (in_array($origin, $allowedOrigins, true)) {
     header("Access-Control-Allow-Origin: $origin");
     header("Access-Control-Allow-Credentials: true");
 } else {
