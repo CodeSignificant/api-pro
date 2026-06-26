@@ -5,7 +5,7 @@ class ProTestService
     public function viewer($node)
     {
         header("Content-Type: text/html");
-        readfile(__DIR__ . '/../test.html');
+        readfile(__DIR__ . '/../tester/index.html');
         exit;
     }
 
@@ -39,6 +39,7 @@ class ProTestService
                     'required_params' => $params['required_query'],
                     'body'            => $params['body'],
                     'required_body'   => $params['required_body'],
+                    'raw_body'        => $params['raw_body'] ?? false,
                     'files'           => $params['files'],
                     'required_files'  => $params['required_files'],
                 ];
@@ -56,6 +57,7 @@ class ProTestService
         $requiredBody  = [];
         $files         = [];
         $requiredFiles = [];
+        $rawBody       = false;
 
         try {
             $ref = new ReflectionMethod($instance, $methodName);
@@ -121,6 +123,13 @@ class ProTestService
                 if (!empty($extraFiles[1])) {
                     foreach ($extraFiles[1] as $k) $files[] = trim($k);
                 }
+
+                // 7. Check if raw body is needed (Node::body() called, but no specific body fields found)
+                if (preg_match("/Node::body\s*\(/i", $code)) {
+                    if (empty($body)) {
+                        $rawBody = true;
+                    }
+                }
             }
         } catch (Exception $e) {
             // Ignore reflection errors for internal classes
@@ -131,6 +140,7 @@ class ProTestService
             'required_query' => array_values(array_unique($requiredQuery)),
             'body'           => array_values(array_unique($body)),
             'required_body'  => array_values(array_unique($requiredBody)),
+            'raw_body'       => $rawBody,
             'files'          => array_values(array_unique($files)),
             'required_files' => array_values(array_unique($requiredFiles)),
         ];

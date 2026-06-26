@@ -5,7 +5,7 @@ class ProLogService
     public function viewer($node)
     {
         header("Content-Type: text/html");
-        readfile(__DIR__ . '/../logs.html');
+        readfile(__DIR__ . '/../logs/index.html');
         exit;
     }
 
@@ -34,6 +34,30 @@ class ProLogService
         $lines = $this->tail($logPath, 1000);
         
         return new DataSuccess('Logs retrieved successfully', ['logs' => $lines], 200, '');
+    }
+
+    public function clear($node)
+    {
+        // Require password
+        $body = Node::body(['password']);
+        
+        $password = defined('LOG_VIEWER_PASSWORD') ? LOG_VIEWER_PASSWORD : '';
+
+        if (empty($password)) {
+            return new DataFailed('Log viewer password is not configured in settings.', 500, null, '');
+        }
+
+        if ($body['password'] !== $password) {
+            return new DataFailed('Unauthorized. Invalid password.', 401, null, '');
+        }
+
+        $logPath = getcwd() . '/prolog.log';
+
+        if (file_exists($logPath)) {
+            file_put_contents($logPath, '');
+        }
+
+        return new DataSuccess('Logs cleared successfully', null, 200, '');
     }
 
     private function tail($filepath, $lines = 100, $adaptive = true) {

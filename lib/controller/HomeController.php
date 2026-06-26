@@ -101,5 +101,25 @@ class HomeController
             'timestamp' => time()
         ], 200, '');
     }
+
+    #[Post('/raw-json')]
+    public function rawJson()
+    {
+        $body = Node::body();
+        Log::info("HomeController::rawJson() - Processing raw JSON request.");
+        Log::info("HomeController::rawJson() - Payload body: " . json_encode($body));
+        Log::warning("HomeController::rawJson() - This is a test warning log.");
+        Log::error("HomeController::rawJson() - This is a test error log.");
+        
+        $response = (new DataSuccess("Received raw JSON successfully!", [
+            'received_body' => $body,
+            'timestamp' => time()
+        ]))
+        ->status(201)
+        ->header('X-Test-Fluent-Header', 'Works-Perfectly');
+
+        Log::info("HomeController::rawJson() - Response created with status 201.");
+        return $response;
+    }
 }
 

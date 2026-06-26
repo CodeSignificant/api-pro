@@ -110,6 +110,9 @@ function runUpdate(string $version, string $projectRoot)
 
     // 1. Core directory is completely overwritten
     if (file_exists("$extractedDir/Core")) {
+        if (file_exists("$projectRoot/Core")) {
+            exec("rm -rf " . escapeshellarg("$projectRoot/Core"));
+        }
         $publishOrOverwrite("$extractedDir/Core", "$projectRoot/Core");
     }
     
@@ -154,44 +157,72 @@ function downloadAndExtract(string $version, string $targetDir): bool
 
     echo "Downloading updates from: $url\n";
 
-    $opts = [
-        'http' => [
-            'method' => 'GET',
-            'header' => [
-                'User-Agent: PHP',
-                'Follow-Redirects: 1'
-            ]
-        ]
-    ];
-    $context = stream_context_create($opts);
+    $zipPath = $targetDir . '/update.zip';
+    $escapedZip = escapeshellarg($zipPath);
+    $escapedUrl = escapeshellarg($url);
+    $curlSuccess = false;
 
-    $zipData = @file_get_contents($url, false, $context);
-    if ($zipData === false) {
-        if ($version !== 'latest' && !empty($version)) {
+    // 1. Try downloading via curl
+    exec("curl -L -s -f -o $escapedZip $escapedUrl", $output, $returnCode);
+    if ($returnCode === 0 && file_exists($zipPath) && filesize($zipPath) > 0) {
+        $curlSuccess = true;
+    }
+
+    // 2. Fallback to file_get_contents with correct stream context options
+    if (!$curlSuccess) {
+        $opts = [
+            'http' => [
+                'method' => 'GET',
+                'header' => "User-Agent: PHP\r\n",
+                'follow_location' => 1,
+                'timeout' => 30
+            ]
+        ];
+        $context = stream_context_create($opts);
+        $zipData = @file_get_contents($url, false, $context);
+        
+        if ($zipData === false && $version !== 'latest' && !empty($version)) {
+            // Retry without 'v' prefix
             $url = "https://github.com/CodeSignificant/api-pro/archive/refs/tags/{$version}.zip";
             echo "Retrying download from: $url\n";
             $zipData = @file_get_contents($url, false, $context);
         }
-        
+
         if ($zipData === false) {
             echo "Error: Failed to download the update package from GitHub.\n";
             return false;
         }
-    }
 
-    $zipPath = $targetDir . '/update.zip';
-    file_put_contents($zipPath, $zipData);
+        file_put_contents($zipPath, $zipData);
+    }
 
     echo "Extracting package...\n";
-    $escapedZip = escapeshellarg($zipPath);
-    $escapedTarget = escapeshellarg($targetDir);
-    exec("unzip -o $escapedZip -d $escapedTarget", $output, $returnCode);
+    $extracted = false;
 
-    if ($returnCode !== 0) {
-        echo "Error: Failed to extract the ZIP archive.\n";
-        return false;
+    // 1. Try ZipArchive
+    if (class_exists('ZipArchive')) {
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath) === true) {
+            $zip->extractTo($targetDir);
+            $zip->close();
+            $extracted = true;
+        }
     }
 
-    unlink($zipPath);
+    // 2. Fallback to command line unzip
+    if (!$extracted) {
+        exec("unzip -o $escapedZip -d " . escapeshellarg($targetDir), $output, $returnCode);
+        if ($returnCode !== 0) {
+            echo "Error: Failed to extract the ZIP archive.\n";
+            if (file_exists($zipPath)) {
+                unlink($zipPath);
+            }
+            return false;
+        }
+    }
+
+    if (file_exists($zipPath)) {
+        unlink($zipPath);
+    }
     return true;
 }

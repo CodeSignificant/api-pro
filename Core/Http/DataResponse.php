@@ -8,6 +8,10 @@ interface DataResponse {
     public function isEmpty(): bool;
     public function getData();
     public function getMessage(): string;
+    public function encrypt(string $key): DataResponse;
+    public function status(int $code): DataResponse;
+    public function header(string $name, string $value): DataResponse;
+    public function getStatusCode(): int;
 }
 
 /**
@@ -18,6 +22,7 @@ class DataSuccess implements DataResponse {
     private $message;
     private $statusCode;
     private $encryptionKey;
+    private $headers = [];
 
     public function __construct(string $message = 'Success', $data = null, int $statusCode = 200, ?string $encryptionKey = null) {
         $this->data = $data;
@@ -27,17 +32,23 @@ class DataSuccess implements DataResponse {
     }
 
     public function toArray(): array {
-        return [
+        $arr = [
             'success' => true,
-            'message' => $this->message,
-            'data' => DataEncryption::encrypt($this->data, $this->encryptionKey)
+            'message' => $this->message
         ];
+        if ($this->data !== null) {
+            $arr['data'] = DataEncryption::encrypt($this->data, $this->encryptionKey);
+        }
+        return $arr;
     }
 
 
     public function response(): void {
         http_response_code($this->statusCode);
         header('Content-Type: application/json');
+        foreach ($this->headers as $name => $value) {
+            header("$name: $value");
+        }
         echo json_encode($this->toArray(), JSON_PRETTY_PRINT);
         exit();
     }
@@ -56,6 +67,25 @@ class DataSuccess implements DataResponse {
 
     public function getMessage(): string {
         return $this->message;
+    }
+
+    public function getStatusCode(): int {
+        return $this->statusCode;
+    }
+
+    public function encrypt(string $key): DataResponse {
+        $this->encryptionKey = $key;
+        return $this;
+    }
+
+    public function status(int $code): DataResponse {
+        $this->statusCode = $code;
+        return $this;
+    }
+
+    public function header(string $name, string $value): DataResponse {
+        $this->headers[$name] = $value;
+        return $this;
     }
 
 
@@ -79,6 +109,7 @@ class DataFailed implements DataResponse {
     private $statusCode;
     private $data;
     private $encryptionKey;
+    private $headers = [];
 
     public function __construct(string $message = 'Request failed', int $statusCode = 200, $data = null, ?string $encryptionKey = null) {
         $this->message = $message;
@@ -88,16 +119,22 @@ class DataFailed implements DataResponse {
     }
 
     public function toArray(): array {
-        return [
+        $arr = [
             'success' => false,
-            'message' => $this->message,
-            'data' => DataEncryption::encrypt($this->data, $this->encryptionKey)
+            'message' => $this->message
         ];
+        if ($this->data !== null) {
+            $arr['data'] = DataEncryption::encrypt($this->data, $this->encryptionKey);
+        }
+        return $arr;
     }
 
     public function response(): void {
         http_response_code($this->statusCode);
         header('Content-Type: application/json');
+        foreach ($this->headers as $name => $value) {
+            header("$name: $value");
+        }
         echo json_encode($this->toArray(), JSON_PRETTY_PRINT);
         exit();
     }
@@ -121,6 +158,25 @@ class DataFailed implements DataResponse {
 
     public function getMessage(): string {
         return $this->message;
+    }
+
+    public function getStatusCode(): int {
+        return $this->statusCode;
+    }
+
+    public function encrypt(string $key): DataResponse {
+        $this->encryptionKey = $key;
+        return $this;
+    }
+
+    public function status(int $code): DataResponse {
+        $this->statusCode = $code;
+        return $this;
+    }
+
+    public function header(string $name, string $value): DataResponse {
+        $this->headers[$name] = $value;
+        return $this;
     }
 
 
