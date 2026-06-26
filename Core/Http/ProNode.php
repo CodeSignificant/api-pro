@@ -97,6 +97,22 @@ class ProNode {
     // Request Listener
     // ===============================
     public static function start() {
+        // Enforce controller location constraint (Compile/Startup Error)
+        if (class_exists('Controller')) {
+            $expectedDir = realpath(getcwd() . '/lib/controller');
+            foreach (get_declared_classes() as $className) {
+                $refClass = new ReflectionClass($className);
+                if ($refClass->isInternal()) continue;
+                
+                if (!empty($refClass->getAttributes(Controller::class))) {
+                    $fileName = $refClass->getFileName();
+                    if ($fileName && ($expectedDir === false || strpos(realpath($fileName), $expectedDir) !== 0)) {
+                        die("Compile Error: Controller class '$className' must be located inside the 'lib/controller' directory. Found in: '$fileName'.\n");
+                    }
+                }
+            }
+        }
+
         // --- 1️⃣ Get raw HTTP method
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
