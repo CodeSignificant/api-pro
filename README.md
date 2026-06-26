@@ -232,15 +232,43 @@ The framework includes a CLI companion tool in the project root: `api-pro`.
   *(Example: `php api-pro update 2.1.0` or simply `php api-pro update` to fetch the latest release).*
 
 
-## Quick Installation
+## Installation Guide
 
-Initialize a brand new project using Composer:
+### Prerequisites
+Make sure your development server meets the following requirements:
+- **PHP**: Version 8.0 or higher.
+- **Extensions**: `pdo_mysql`, `openssl`, `redis` (or a compatible Redis library), and optionally `zip` (for framework updates).
+- **Composer**: PHP dependency manager.
+- **Services**: MySQL/MariaDB and Redis.
 
+### Option 1: Via Composer (Recommended)
+Create a brand new ApiPro project from the official skeleton:
 ```bash
 composer create-project codesignificant/api-pro my-new-api
 ```
+This command downloads the framework skeleton, initializes the correct configurations, performs post-install mappings, and cleans up temporary setup documentation for a production-ready folder structure.
 
-This downloads the framework skeleton, configures autoload pathways, executes the automatic installation script, and unlinks all markdown documentation files in the final workspace for a perfectly clean codebase.
+### Option 2: Direct Git Clone
+Clone the repository manually:
+```bash
+# Clone the repository
+git clone https://github.com/CodeSignificant/api-pro.git my-new-api
+cd my-new-api
+
+# Install dependencies and trigger post-install setup
+composer install
+```
+
+### Post-Installation Setup
+1. **Configure Environment**: Update `config.php` in the root directory with your MySQL DB, Redis, and MAILER settings.
+2. **Set up Web Server routing**:
+   - **Apache**: The preconfigured `.htaccess` file handles URL rewriting and routes requests to `index.php` out of the box. Ensure `mod_rewrite` is enabled.
+   - **Nginx**: Set your server block configuration to rewrite unmatched requests:
+     ```nginx
+     location / {
+         try_files $uri $uri/ /index.php?$query_string;
+     }
+     ```
 
 
 ---
