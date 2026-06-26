@@ -116,20 +116,23 @@ function runUpdate(string $version, string $projectRoot)
         $publishOrOverwrite("$extractedDir/Core", "$projectRoot/Core");
     }
     
-    // 2. Server configurations/scripts (.htaccess, post-install.php) are overwritten
+    // 2. Server configurations/scripts (.htaccess, post-install.php, index.php, composer.json) are overwritten
     if (file_exists("$extractedDir/.htaccess")) {
         $publishOrOverwrite("$extractedDir/.htaccess", "$projectRoot/.htaccess");
     }
     if (file_exists("$extractedDir/post-install.php")) {
         $publishOrOverwrite("$extractedDir/post-install.php", "$projectRoot/post-install.php");
     }
+    if (file_exists("$extractedDir/index.php")) {
+        $publishOrOverwrite("$extractedDir/index.php", "$projectRoot/index.php");
+    }
+    if (file_exists("$extractedDir/composer.json")) {
+        $publishOrOverwrite("$extractedDir/composer.json", "$projectRoot/composer.json");
+    }
 
-    // 3. User code and configs (lib/, config.php, index.php) are preserved
+    // 3. User code and configs (lib/, config.php) are preserved
     if (file_exists("$extractedDir/config.php")) {
         $publishIfMissing("$extractedDir/config.php", "$projectRoot/config.php");
-    }
-    if (file_exists("$extractedDir/index.php")) {
-        $publishIfMissing("$extractedDir/index.php", "$projectRoot/index.php");
     }
     if (file_exists("$extractedDir/lib/controller")) {
         $publishIfMissing("$extractedDir/lib/controller", "$projectRoot/lib/controller");
@@ -152,7 +155,7 @@ function downloadAndExtract(string $version, string $targetDir): bool
 {
     $url = "https://github.com/CodeSignificant/api-pro/archive/refs/tags/v{$version}.zip";
     if ($version === 'latest' || empty($version)) {
-        $url = "https://github.com/CodeSignificant/api-pro/archive/refs/heads/main.zip";
+        $url = "https://github.com/CodeSignificant/api-pro/archive/refs/heads/snapshot.zip";
     }
 
     echo "Downloading updates from: $url\n";
