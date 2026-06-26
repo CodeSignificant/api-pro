@@ -20,7 +20,7 @@
       "php post-install.php"
     ],
     "start": [
-      "php -S [IP_ADDRESS] index.php"
+      "php -S 127.0.0.1:4567 index.php"
     ]
   },
   "minimum-stability": "stable",
