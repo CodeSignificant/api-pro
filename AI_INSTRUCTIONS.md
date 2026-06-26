@@ -13,6 +13,7 @@ ApiPro strictly separates concerns across three core architectural layers to gua
 ### 1. Controller Layer (`lib/controller/`)
 - Acts as the HTTP gateway and routing boundary.
 - Registered via modern declarative attributes: `#[Controller('/v1/path')]`, `#[Get('/route')]`, `#[Post('/route')]`.
+- **STRICT FOLDER CONSTRAINT**: All controller files and classes **MUST** be created inside the `lib/controller/` directory. You are strictly forbidden from placing controller classes in any other folder (such as `lib/service/`, `lib/repo/`, or the project root). The framework runs a startup/compile-time validation check on request initialization; defining any class with the `#[Controller]` attribute outside this directory will trigger a fatal `Compile Error` and halt execution.
 - **Responsibilities**:
   1. Parses raw HTTP requests using static helpers: `Node::body()`, `Node::params()`, `Node::files()`.
   2. Resolves and validates security sessions: `Session::Get($expectedRole)`.
@@ -299,6 +300,7 @@ The server will be accessible at `http://127.0.0.1:8000`.
 2. **Environment Configuration**: Set credentials and encryption constants in `config.php`:
    - `SERVER_ENC` (Tokens and session keys)
    - `DATA_ENC` (Symmetric response data keys)
+   - `CORS` (Comma-separated allowed CORS origins. If empty/undefined, defaults to `"http://localhost:3000, http://127.0.0.1:3000"`)
    - Redis host and port config (`TOKEN_DRIVER => 'redis'`)
    - Database sync modes (`DB_WRITE => 'update'` for dev, `DB_WRITE => false` for database-less or production mode)
 
@@ -314,9 +316,12 @@ The framework includes a terminal CLI tool in the project root: `api-pro`.
   php api-pro version
   ```
 - **Update Framework**:
-  Downloads the latest release ZIP package from the official repository and securely updates the `Core/` framework directory, entry points (`index.php`, `.htaccess`), and dependencies while completely preserving your custom application code (`lib/`), configurations (`config.php`), and non-project folders:
+  Downloads the latest release ZIP package from the official repository and securely updates the `Core/` framework directory, entry points (`index.php`, `.htaccess`), configuration setup (`post-install.php`), `composer.json` file, and dependencies while completely preserving your custom application code (`lib/`) and configuration settings (`config.php`). It automatically executes the `post-install.php` setup script on completion to finalize configuration and sync missing settings.
+  
+  > [!IMPORTANT]
+  > Always run the CLI tool from the project root directory where the `api-pro` script is located.
   ```bash
   php api-pro update [version]
   ```
-  *(Example: `php api-pro update 2.1.0` or simply `php api-pro update` to fetch the latest release).*
+  *(Example: `php api-pro update 2.3.1` or simply `php api-pro update` to fetch the latest release).*
 
