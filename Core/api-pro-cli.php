@@ -129,6 +129,9 @@ function runUpdate(string $version, string $projectRoot)
     if (file_exists("$extractedDir/composer.json")) {
         $publishOrOverwrite("$extractedDir/composer.json", "$projectRoot/composer.json");
     }
+    if (file_exists("$extractedDir/AI_INSTRUCTIONS.md")) {
+        $publishOrOverwrite("$extractedDir/AI_INSTRUCTIONS.md", "$projectRoot/AI_INSTRUCTIONS.md");
+    }
 
     // 3. User code and configs (lib/, config.php) are preserved
     if (file_exists("$extractedDir/config.php")) {
