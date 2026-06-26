@@ -129,9 +129,6 @@ function runUpdate(string $version, string $projectRoot)
     if (file_exists("$extractedDir/composer.json")) {
         $publishOrOverwrite("$extractedDir/composer.json", "$projectRoot/composer.json");
     }
-    if (file_exists("$extractedDir/AI_INSTRUCTIONS.md")) {
-        $publishOrOverwrite("$extractedDir/AI_INSTRUCTIONS.md", "$projectRoot/AI_INSTRUCTIONS.md");
-    }
 
     // 3. User code and configs (lib/, config.php) are preserved
     if (file_exists("$extractedDir/config.php")) {
@@ -158,7 +155,7 @@ function downloadAndExtract(string $version, string $targetDir): bool
 {
     $url = "https://github.com/CodeSignificant/api-pro/archive/refs/tags/v{$version}.zip";
     if ($version === 'latest' || empty($version)) {
-        $url = "https://github.com/CodeSignificant/api-pro/archive/refs/heads/snapshot.zip";
+        $url = "https://github.com/CodeSignificant/api-pro/archive/refs/heads/main.zip";
     }
 
     echo "Downloading updates from: $url\n";

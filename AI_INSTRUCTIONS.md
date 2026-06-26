@@ -13,6 +13,7 @@ ApiPro strictly separates concerns across three core architectural layers to gua
 ### 1. Controller Layer (`lib/controller/`)
 - Acts as the HTTP gateway and routing boundary.
 - Registered via modern declarative attributes: `#[Controller('/v1/path')]`, `#[Get('/route')]`, `#[Post('/route')]`.
+- **STRICT FOLDER CONSTRAINT**: All controller files and classes **MUST** be created inside the `lib/controller/` directory. You are strictly forbidden from placing controller classes in any other folder (such as `lib/service/`, `lib/repo/`, or the project root).
 - **Responsibilities**:
   1. Parses raw HTTP requests using static helpers: `Node::body()`, `Node::params()`, `Node::files()`.
   2. Resolves and validates security sessions: `Session::Get($expectedRole)`.
