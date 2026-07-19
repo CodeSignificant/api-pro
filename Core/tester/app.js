@@ -128,12 +128,8 @@ function renderSidebar(tree) {
             updateToggleAllIcon(anyOpen);
         };
 
-        // Default open first group
-        if (list.children.length === 0) {
-            header.classList.add('open');
-            body.classList.add('open');
-            header.querySelector('.accordion-chevron').classList.add('open');
-        }
+        // Removed default open of first route group – keep all collapsed on initial load
+
 
         group.appendChild(header);
         group.appendChild(body);
