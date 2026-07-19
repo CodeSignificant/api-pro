@@ -331,6 +331,36 @@ composer install
 
 ## Release Notes & Updates
 
+### Version 2.4.1 Release Notes
+
+ApiPro `v2.4.1` enforces explicit source targeting on all request getters and introduces the `query` property alias.
+
+- **Enforced Explicit Source Targeting**:
+  - Direct getter calls on the `Request` object (e.g. `$request->getString()`) now throw an `Exception` at runtime with a clear developer message.
+  - All getters **must** now be called on a specific source: `$request->body->getString()`, `$request->query->getString()`, or `$request->files->getFile()`.
+  - This prevents ambiguity about where a value is sourced and makes controller intent immediately clear.
+- **New `query` Property Alias**:
+  - Added `$request->query` as a semantic alias for `$request->params`, allowing more expressive and idiomatic code (e.g. `$request->query->getInt('page', 1)`).
+  - Both `params` and `query` are fully supported and interchangeable.
+- **API Tester UI — Source Badges**:
+  - The interactive tester now renders colored source tags alongside each parameter field.
+  - 🟡 `body` — amber badge for body-sourced parameters (`$request->body->...`)
+  - 🟢 `query` — green badge for query-string parameters (`$request->query->...` or `$request->params->...`)
+  - 🟣 `files` — purple badge for file upload fields (`$request->files->...`)
+  - Source badges are derived from static analysis of controller code in `ProTestService.php`.
+- **CLI: `start` / `serve` Command**:
+  - Added `php api-pro start` to launch the built-in PHP development server.
+  - Supports `--port=7070`, `--port 7070`, `-p 7070`, and `--host=0.0.0.0` options. Defaults to `127.0.0.1:7070`.
+- **CLI: `latest` Command**:
+  - Added `php api-pro latest` (aliases: `--latest`, `-l`) to check the latest available release on GitHub.
+  - Compares it to the locally installed version and prompts for update if a newer version exists.
+- **CLI: `changelog` Command**:
+  - Added `php api-pro changelog [version]` (aliases: `--changelog`, `-c`) to display release notes in the terminal.
+  - Defaults to the currently installed version if no version argument is given.
+- **CLI: `update` Enhancements**:
+  - `php api-pro update` now also overwrites `README.md` and `AI_INSTRUCTIONS.md` to keep documentation current.
+  - After a successful update, the release notes for the newly installed version are printed automatically.
+
 ### Version 2.4.0 Release Notes
 
 ApiPro `v2.4.0` focuses on improving request input validation, parameter type safety, and inline endpoint documentation.
@@ -371,7 +401,7 @@ ApiPro `v2.3.0` focuses on modularizing the debugger tools, introducing global u
 To update your existing ApiPro project to this latest release, execute the built-in updater command from your terminal:
 
 ```bash
-php api-pro update 2.4.0
+php api-pro update 2.4.1
 ```
 
 The updater will download the specified release, safely perform a fresh overwrite of the framework `Core/` directory, and verify your updated setup while keeping your custom `lib/` controllers/services and `config.php` files untouched.

@@ -125,8 +125,8 @@ class ProTestService
                 }
 
                 // --- MODERN REQUEST SYNTAX PARSING ---
-                // Extract parameters from calls like $request->body->getString("key") or $request->getString("key")
-                $requestRegex = '/\$[a-zA-Z0-9_]+(?:->(body|params|files))?->(getString|getInt|getFloat|getBool|getArray|getObject|getFile|getFiles|get)\(\s*(["\'])(.*?)\3\s*(?:,\s*([^)]+))?\)/s';
+                // Extract parameters from calls like $request->body->getString("key") or $request->query->getString("key")
+                $requestRegex = '/\$[a-zA-Z0-9_]+->(body|params|query|files)->(getString|getInt|getFloat|getBool|getArray|getObject|getFile|getFiles|get)\(\s*(["\'])(.*?)\3\s*(?:,\s*([^)]+))?\)/s';
                 preg_match_all($requestRegex, $code, $requestMatches, PREG_SET_ORDER);
 
                 foreach ($requestMatches as $match) {
@@ -136,15 +136,12 @@ class ProTestService
                     $hasDefault = isset($match[5]) && trim($match[5]) !== '';
 
                     $category = '';
-                    if ($prop === 'params') {
+                    if ($prop === 'params' || $prop === 'query') {
                         $category = 'query';
                     } elseif ($prop === 'body') {
                         $category = 'body';
                     } elseif ($prop === 'files' || $method === 'getFile' || $method === 'getFiles') {
                         $category = 'files';
-                    } else {
-                        // Direct call: check route method
-                        $category = (strtoupper($routeMethod) === 'GET') ? 'query' : 'body';
                     }
 
                     if ($category === 'query') {
