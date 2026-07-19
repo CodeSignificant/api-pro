@@ -24,3 +24,70 @@ Test log entry from ApiPro[19-Jul-2026 19:09:33 UTC] [2026-07-19 19:09:33] [INFO
 [19-Jul-2026 20:39:21 UTC] [2026-07-19 20:39:21] [ERROR] Response: GET / - Status: 404
 [19-Jul-2026 20:39:21 UTC] [2026-07-19 20:39:21] [INFO] Request: GET /favicon.ico
 [19-Jul-2026 20:39:21 UTC] [2026-07-19 20:39:21] [ERROR] Response: GET /favicon.ico - Status: 404
+[19-Jul-2026 20:50:36 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[19-Jul-2026 20:50:36 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 243
+[19-Jul-2026 20:50:36 UTC] [2026-07-19 20:50:36] [INFO] Request: GET /
+[19-Jul-2026 20:50:36 UTC] [2026-07-19 20:50:36] [ERROR] Response: GET / - Status: 404
+[19-Jul-2026 20:50:36 UTC] [2026-07-19 20:50:36] [INFO] Request: GET /favicon.ico
+[19-Jul-2026 20:50:36 UTC] [2026-07-19 20:50:36] [ERROR] Response: GET /favicon.ico - Status: 404
+[19-Jul-2026 20:51:49 UTC] PHP Warning:  require_once(/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php): Failed to open stream: No such file or directory in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:51:49 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php' (include_path='.:/usr/share/php') in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php:2
+Stack trace:
+#0 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/ProNode.php(14): require_once()
+#1 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/index.php(12): ProNode::scan()
+#2 {main}
+  thrown in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:51:57 UTC] PHP Warning:  require_once(/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php): Failed to open stream: No such file or directory in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:51:57 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php' (include_path='.:/usr/share/php') in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php:2
+Stack trace:
+#0 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/ProNode.php(14): require_once()
+#1 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/index.php(12): ProNode::scan()
+#2 {main}
+  thrown in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:52:03 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[19-Jul-2026 20:52:03 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 243
+[19-Jul-2026 20:52:03 UTC] PHP Warning:  require_once(/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php): Failed to open stream: No such file or directory in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:52:03 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php' (include_path='.:/usr/share/php') in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php:2
+Stack trace:
+#0 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/ProNode.php(14): require_once()
+#1 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/index.php(12): ProNode::scan()
+#2 {main}
+  thrown in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:52:22 UTC] PHP Warning:  require_once(/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php): Failed to open stream: No such file or directory in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:52:22 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php' (include_path='.:/usr/share/php') in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php:2
+Stack trace:
+#0 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/ProNode.php(14): require_once()
+#1 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/index.php(12): ProNode::scan()
+#2 {main}
+  thrown in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:52:26 UTC] PHP Warning:  require_once(/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php): Failed to open stream: No such file or directory in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:52:26 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php' (include_path='.:/usr/share/php') in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php:2
+Stack trace:
+#0 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/ProNode.php(14): require_once()
+#1 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/index.php(12): ProNode::scan()
+#2 {main}
+  thrown in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:52:46 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[19-Jul-2026 20:52:46 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 243
+[19-Jul-2026 20:52:46 UTC] PHP Warning:  require_once(/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php): Failed to open stream: No such file or directory in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:52:46 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php' (include_path='.:/usr/share/php') in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php:2
+Stack trace:
+#0 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/ProNode.php(14): require_once()
+#1 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/index.php(12): ProNode::scan()
+#2 {main}
+  thrown in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:52:52 UTC] PHP Warning:  require_once(/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php): Failed to open stream: No such file or directory in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:52:52 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/../service/DummyService.php' (include_path='.:/usr/share/php') in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php:2
+Stack trace:
+#0 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/ProNode.php(14): require_once()
+#1 /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/index.php(12): ProNode::scan()
+#2 {main}
+  thrown in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/lib/controller/DummyController.php on line 2
+[19-Jul-2026 20:54:57 UTC] [2026-07-19 20:54:57] [INFO] Request: GET /v1/dummy/ping
+[19-Jul-2026 20:54:57 UTC] [2026-07-19 20:54:57] [ERROR] Response: GET /v1/dummy/ping - Status: 500
+[19-Jul-2026 20:55:54 UTC] [2026-07-19 20:55:54] [INFO] Request: GET /v1/dummy/ping
+[19-Jul-2026 20:55:54 UTC] [2026-07-19 20:55:54] [INFO] Response: GET /v1/dummy/ping - Status: 200
+[19-Jul-2026 20:58:39 UTC] [2026-07-19 20:58:39] [INFO] Request: GET /tester/routes
+[19-Jul-2026 20:58:39 UTC] [2026-07-19 20:58:39] [ERROR] Response: GET /tester/routes - Status: 404
+[19-Jul-2026 20:58:46 UTC] [2026-07-19 20:58:46] [INFO] Request: GET /tester/routes
+[19-Jul-2026 20:58:46 UTC] [2026-07-19 20:58:46] [ERROR] Response: GET /tester/routes - Status: 404
