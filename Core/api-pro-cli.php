@@ -52,6 +52,11 @@ switch ($command) {
         }
         break;
         
+    case 'start':
+    case 'serve':
+        runServer($args, $projectRoot);
+        break;
+        
     case 'help':
     case '--help':
     case '-h':
@@ -79,6 +84,7 @@ function showHelp()
     echo "Usage:\n";
     echo "  php api-pro <command> [options]\n\n";
     echo "Commands:\n";
+    echo "  start               Start the local PHP development server (e.g. php api-pro start --port=7070)\n";
     echo "  update [version]    Update the ApiPro framework to the specified version (defaults to latest)\n";
     echo "  version             Display the current ApiPro framework version\n";
     echo "  latest              Check the latest available version of ApiPro on GitHub\n";
@@ -368,4 +374,43 @@ function getLatestVersion(): string
     }
     
     return 'Unknown';
+}
+
+function runServer(array $args, string $projectRoot)
+{
+    $port = 7070;
+    $host = '127.0.0.1';
+
+    // Normalize arguments (remove isolated '=')
+    $cleanArgs = [];
+    foreach ($args as $a) {
+        if ($a !== '=') {
+            $cleanArgs[] = ltrim($a, '=');
+        }
+    }
+
+    for ($i = 0; $i < count($cleanArgs); $i++) {
+        $arg = trim($cleanArgs[$i]);
+        if (empty($arg)) continue;
+
+        if (preg_match('/^--port=(.+)$/', $arg, $m)) {
+            $port = (int)$m[1];
+        } elseif (($arg === '--port' || $arg === '-p') && isset($cleanArgs[$i + 1])) {
+            $port = (int)$cleanArgs[$i + 1];
+            $i++;
+        } elseif (preg_match('/^--host=(.+)$/', $arg, $m)) {
+            $host = $m[1];
+        } elseif ($arg === '--host' && isset($cleanArgs[$i + 1])) {
+            $host = $cleanArgs[$i + 1];
+            $i++;
+        } elseif (is_numeric($arg)) {
+            $port = (int)$arg;
+        }
+    }
+
+    echo "Starting ApiPro development server on http://{$host}:{$port}...\n";
+    echo "Press Ctrl+C to stop.\n\n";
+
+    chdir($projectRoot);
+    passthru("php -S {$host}:{$port} index.php");
 }
