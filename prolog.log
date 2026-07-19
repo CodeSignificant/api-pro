@@ -91,3 +91,5 @@ Stack trace:
 [19-Jul-2026 20:58:39 UTC] [2026-07-19 20:58:39] [ERROR] Response: GET /tester/routes - Status: 404
 [19-Jul-2026 20:58:46 UTC] [2026-07-19 20:58:46] [INFO] Request: GET /tester/routes
 [19-Jul-2026 20:58:46 UTC] [2026-07-19 20:58:46] [ERROR] Response: GET /tester/routes - Status: 404
+[19-Jul-2026 21:10:30 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[19-Jul-2026 21:10:30 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 243

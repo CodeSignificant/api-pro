@@ -11,6 +11,12 @@ $args = $argv;
 $scriptName = array_shift($args); // remove script name
 $command = array_shift($args) ?? 'help';
 
+// Auto-default to 'start' if a port flag is passed directly (e.g. php api-pro -p 7080)
+if (in_array($command, ['-p', '--port']) || str_starts_with($command, '--port=')) {
+    array_unshift($args, $command);
+    $command = 'start';
+}
+
 switch ($command) {
     case 'update':
         $version = array_shift($args) ?? 'latest';
@@ -408,7 +414,10 @@ function runServer(array $args, string $projectRoot)
         }
     }
 
-    echo "Starting ApiPro development server on http://{$host}:{$port}...\n";
+    echo "\033[1;32mStarting ApiPro development server...\033[0m\n\n";
+    echo "  \033[1;34mApp URL:\033[0m    http://{$host}:{$port}\n";
+    echo "  \033[1;34mAPI Tester:\033[0m http://{$host}:{$port}/test.html\n";
+    echo "  \033[1;34mLogger:\033[0m     http://{$host}:{$port}/logs.html\n\n";
     echo "Press Ctrl+C to stop.\n\n";
 
     chdir($projectRoot);
