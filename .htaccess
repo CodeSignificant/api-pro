@@ -2,11 +2,18 @@
 # API PRO - Apache Configuration
 # ===============================
 
+# --- CORS Headers Integration ---
 <IfModule mod_headers.c>
-    # --- CORS ---
-    Header always set Access-Control-Allow-Origin "https://apipro.4ss.in"
-    Header always set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept"
+    # Allow your specific SPA origin (change to specific origin if needed)
+    Header always set Access-Control-Allow-Origin "https://api-pro.4ss.in"
+    
+    # Specify the allowed methods
+    Header always set Access-Control-Allow-Methods "POST, GET, OPTIONS, PUT, DELETE, PATCH"
+    
+    # Explicitly allow Content-Type and other incoming headers (including ApiPro specific headers)
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Origin, Accept, X-Device-Id, Device-Id"
+    
+    # Support credentials (required if sending cookies or authorization tokens)
     Header always set Access-Control-Allow-Credentials "true"
 </IfModule>
 

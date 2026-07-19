@@ -188,8 +188,26 @@ class ProNode {
             return;
         }
 
-        $node = new Node();
-        $response = $controller->$fn($node);
+        // Reflection to inspect first parameter of the controller method
+        $refMethod = new ReflectionMethod($controller, $fn);
+        $methodParams = $refMethod->getParameters();
+        $arg = null;
+        if (!empty($methodParams)) {
+            $firstParam = $methodParams[0];
+            $type = $firstParam->getType();
+            if ($type && !$type->isBuiltin() && $type->getName() === 'Node') {
+                $arg = new Node();
+                if (!headers_sent()) {
+                    header("X-ApiPro-Warning: Node class is deprecated. Please migrate to Request class.", false);
+                }
+            } else {
+                $arg = new Request();
+            }
+        } else {
+            $arg = new Request();
+        }
+
+        $response = $controller->$fn($arg);
         self::logResponse($method, $path, $response);
         self::respond($response);
     }

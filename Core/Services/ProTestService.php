@@ -29,7 +29,7 @@ class ProTestService
                     $tree[$className] = [];
                 }
 
-                $params = $this->extractParamsFromCode($instance, $methodName);
+                $params = $this->extractParamsFromCode($instance, $methodName, $method);
 
                 $tree[$className][] = [
                     'path'            => $path,
@@ -42,6 +42,8 @@ class ProTestService
                     'raw_body'        => $params['raw_body'] ?? false,
                     'files'           => $params['files'],
                     'required_files'  => $params['required_files'],
+                    'deprecated'      => $params['deprecated'] ?? false,
+                    'comment'         => $params['comment'] ?? '',
                 ];
             }
         }
@@ -49,7 +51,7 @@ class ProTestService
         return new DataSuccess('Routes fetched', ['tree' => $tree], 200, '');
     }
 
-    private function extractParamsFromCode($instance, $methodName)
+    private function extractParamsFromCode($instance, $methodName, $routeMethod)
     {
         $query         = [];
         $requiredQuery = [];
@@ -58,6 +60,8 @@ class ProTestService
         $files         = [];
         $requiredFiles = [];
         $rawBody       = false;
+        $deprecated    = false;
+        $comment       = '';
 
         try {
             $ref = new ReflectionMethod($instance, $methodName);
@@ -70,6 +74,20 @@ class ProTestService
                 $source = file($filename);
                 $code = implode("", array_slice($source, $start_line, $length));
 
+                // Check for Node deprecation
+                if (strpos($code, 'Node::') !== false) {
+                    $deprecated = true;
+                }
+
+                // Extract comments added via ->addComment("...") or addComment('...')
+                preg_match_all('/->addComment\(\s*(["\'])(.*?)\1\s*\)/s', $code, $commentMatches, PREG_SET_ORDER);
+                $comments = [];
+                foreach ($commentMatches as $m) {
+                    $comments[] = stripslashes($m[2]);
+                }
+                $comment = implode("\n\n", $comments);
+
+                // --- LEGACY NODE SYNTAX PARSING ---
                 // 1. Required Query Params — declared in Node::params([...])
                 preg_match_all("/Node::params\(\s*\[([^\]]+)\]\s*\)/s", $code, $paramMatches);
                 if (!empty($paramMatches[1])) {
@@ -106,6 +124,47 @@ class ProTestService
                     }
                 }
 
+                // --- MODERN REQUEST SYNTAX PARSING ---
+                // Extract parameters from calls like $request->body->getString("key") or $request->getString("key")
+                $requestRegex = '/\$[a-zA-Z0-9_]+(?:->(body|params|files))?->(getString|getInt|getFloat|getBool|getArray|getObject|getFile|getFiles|get)\(\s*(["\'])(.*?)\3\s*(?:,\s*([^)]+))?\)/s';
+                preg_match_all($requestRegex, $code, $requestMatches, PREG_SET_ORDER);
+
+                foreach ($requestMatches as $match) {
+                    $prop = $match[1];
+                    $method = $match[2];
+                    $key = trim($match[4]);
+                    $hasDefault = isset($match[5]) && trim($match[5]) !== '';
+
+                    $category = '';
+                    if ($prop === 'params') {
+                        $category = 'query';
+                    } elseif ($prop === 'body') {
+                        $category = 'body';
+                    } elseif ($prop === 'files' || $method === 'getFile' || $method === 'getFiles') {
+                        $category = 'files';
+                    } else {
+                        // Direct call: check route method
+                        $category = (strtoupper($routeMethod) === 'GET') ? 'query' : 'body';
+                    }
+
+                    if ($category === 'query') {
+                        $query[] = $key;
+                        if (!$hasDefault) {
+                            $requiredQuery[] = $key;
+                        }
+                    } elseif ($category === 'body') {
+                        $body[] = $key;
+                        if (!$hasDefault) {
+                            $requiredBody[] = $key;
+                        }
+                    } elseif ($category === 'files') {
+                        $files[] = $key;
+                        if (!$hasDefault) {
+                            $requiredFiles[] = $key;
+                        }
+                    }
+                }
+
                 // 4. Extract Optional Query Params via array access (e.g. $params['min_price'] or $_GET['min_price'])
                 preg_match_all('/(?:\$[a-zA-Z0-9_]*params?|\$_GET)\[[\'\"]([^\'\"]+)[\'\"]\]/i', $code, $extraParams);
                 if (!empty($extraParams[1])) {
@@ -125,7 +184,7 @@ class ProTestService
                 }
 
                 // 7. Check if raw body is needed (Node::body() called, but no specific body fields found)
-                if (preg_match("/Node::body\s*\(/i", $code)) {
+                if (preg_match("/Node::body\s*\(/i", $code) || preg_match("/->body->all\s*\(/i", $code)) {
                     if (empty($body)) {
                         $rawBody = true;
                     }
@@ -143,6 +202,8 @@ class ProTestService
             'raw_body'       => $rawBody,
             'files'          => array_values(array_unique($files)),
             'required_files' => array_values(array_unique($requiredFiles)),
+            'deprecated'     => $deprecated,
+            'comment'        => $comment,
         ];
     }
 }

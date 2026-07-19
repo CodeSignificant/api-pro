@@ -194,6 +194,26 @@ function selectRoute(route, element) {
     buildFormSection('querySection', 'queryFields', route.params || [], route.required_params || []);
     buildBodySection(route);
     buildFileSection('fileSection', 'fileFields', route.files || [], route.required_files || []);
+
+    // Deprecation Warning Toggle
+    const depEl = document.getElementById('deprecationWarning');
+    if (depEl) {
+        depEl.style.display = route.deprecated ? 'block' : 'none';
+    }
+
+    // Comment Section Toggle
+    const commentEl = document.getElementById('commentSection');
+    const commentTextEl = document.getElementById('commentText');
+    if (commentEl && commentTextEl) {
+        if (route.comment) {
+            commentEl.style.display = 'block';
+            commentTextEl.innerText = route.comment;
+        } else {
+            commentEl.style.display = 'none';
+            commentTextEl.innerText = '';
+        }
+    }
+
     restoreEndpointInputs();
 }
 

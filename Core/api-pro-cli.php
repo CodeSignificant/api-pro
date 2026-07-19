@@ -18,10 +18,43 @@ switch ($command) {
         break;
         
     case 'version':
+    case '--version':
+    case '--vesion':
+    case '-v':
         showVersion($projectRoot);
+        break;
+
+    case 'latest':
+    case '--latest':
+    case '-l':
+        checkLatestVersion($projectRoot);
+        break;
+
+    case 'changelog':
+    case '--changelog':
+    case '-c':
+        $verArg = array_shift($args);
+        if (empty($verArg)) {
+            // Retrieve current version
+            $autoload = $projectRoot . '/Core/autoload.php';
+            $verArg = 'Unknown';
+            if (file_exists($autoload)) {
+                $content = file_get_contents($autoload);
+                if (preg_match("/define\(\s*['\"]APIPRO_VERSION['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)/", $content, $matches)) {
+                    $verArg = $matches[1];
+                }
+            }
+        }
+        if ($verArg !== 'Unknown') {
+            showChangelog($verArg, $projectRoot);
+        } else {
+            echo "Error: Could not determine version to show changelog for.\n";
+        }
         break;
         
     case 'help':
+    case '--help':
+    case '-h':
     default:
         showHelp();
         break;
@@ -46,9 +79,11 @@ function showHelp()
     echo "Usage:\n";
     echo "  php api-pro <command> [options]\n\n";
     echo "Commands:\n";
-    echo "  update [version]  Update the ApiPro framework to the specified version (defaults to latest)\n";
-    echo "  version           Display the current ApiPro framework version\n";
-    echo "  help              Display this help message\n";
+    echo "  update [version]    Update the ApiPro framework to the specified version (defaults to latest)\n";
+    echo "  version             Display the current ApiPro framework version\n";
+    echo "  latest              Check the latest available version of ApiPro on GitHub\n";
+    echo "  changelog [version] Display the release notes for the specified version (defaults to current)\n";
+    echo "  help                Display this help message\n";
 }
 
 function runUpdate(string $version, string $projectRoot)
@@ -130,6 +165,14 @@ function runUpdate(string $version, string $projectRoot)
         $publishOrOverwrite("$extractedDir/composer.json", "$projectRoot/composer.json");
     }
 
+    // 2.5 Overwrite documentation files (README.md, AI_INSTRUCTIONS.md)
+    if (file_exists("$extractedDir/README.md")) {
+        $publishOrOverwrite("$extractedDir/README.md", "$projectRoot/README.md");
+    }
+    if (file_exists("$extractedDir/AI_INSTRUCTIONS.md")) {
+        $publishOrOverwrite("$extractedDir/AI_INSTRUCTIONS.md", "$projectRoot/AI_INSTRUCTIONS.md");
+    }
+
     // 3. User code and configs (lib/, config.php) are preserved
     if (file_exists("$extractedDir/config.php")) {
         $publishIfMissing("$extractedDir/config.php", "$projectRoot/config.php");
@@ -148,7 +191,20 @@ function runUpdate(string $version, string $projectRoot)
     exec("rm -rf " . escapeshellarg($tempDir));
 
     echo "ApiPro updated successfully!\n";
-    showVersion($projectRoot);
+    
+    // Retrieve the newly installed version
+    $autoload = $projectRoot . '/Core/autoload.php';
+    $updatedVersion = 'Unknown';
+    if (file_exists($autoload)) {
+        $content = file_get_contents($autoload);
+        if (preg_match("/define\(\s*['\"]APIPRO_VERSION['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)/", $content, $matches)) {
+            $updatedVersion = $matches[1];
+        }
+    }
+    echo "ApiPro CLI version: " . $updatedVersion . "\n";
+    if ($updatedVersion !== 'Unknown') {
+        showChangelog($updatedVersion, $projectRoot);
+    }
 }
 
 function downloadAndExtract(string $version, string $targetDir): bool
@@ -228,4 +284,88 @@ function downloadAndExtract(string $version, string $targetDir): bool
         unlink($zipPath);
     }
     return true;
+}
+
+function showChangelog(string $version, string $projectRoot)
+{
+    $readme = $projectRoot . '/README.md';
+    if (!file_exists($readme)) {
+        return;
+    }
+    $content = file_get_contents($readme);
+    $pattern = "/###\s*Version\s*" . preg_quote($version, '/') . "\s*Release\s*Notes(.*?)(?=###|---|#|$)/is";
+    if (preg_match($pattern, $content, $matches)) {
+        echo "\nRelease Notes for v{$version}:\n";
+        echo "========================================\n";
+        echo trim($matches[1]) . "\n";
+        echo "========================================\n\n";
+    }
+}
+
+function checkLatestVersion(string $projectRoot)
+{
+    // Retrieve current version
+    $autoload = $projectRoot . '/Core/autoload.php';
+    $current = 'Unknown';
+    if (file_exists($autoload)) {
+        $content = file_get_contents($autoload);
+        if (preg_match("/define\(\s*['\"]APIPRO_VERSION['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*\)/", $content, $matches)) {
+            $current = $matches[1];
+        }
+    }
+    
+    echo "Current ApiPro version: " . $current . "\n";
+    echo "Checking for latest available version on GitHub...\n";
+    
+    $latest = getLatestVersion();
+    
+    if ($latest === 'Unknown') {
+        echo "Could not fetch the latest version details from GitHub. Please check your internet connection.\n";
+        return;
+    }
+    
+    echo "Latest available version: " . $latest . "\n";
+    
+    if ($current !== 'Unknown') {
+        if (version_compare($current, $latest, '<')) {
+            echo "A new version of ApiPro is available! Run 'php api-pro update' to upgrade to v{$latest}.\n";
+        } else {
+            echo "You are running the latest version of ApiPro.\n";
+        }
+    }
+}
+
+function getLatestVersion(): string
+{
+    $url = "https://api.github.com/repos/CodeSignificant/api-pro/releases/latest";
+    $opts = [
+        'http' => [
+            'method' => 'GET',
+            'header' => [
+                "User-Agent: PHP\r\n",
+                "Accept: application/vnd.github.v3+json\r\n"
+            ],
+            'timeout' => 10
+        ]
+    ];
+    $context = stream_context_create($opts);
+    $json = @file_get_contents($url, false, $context);
+    if ($json !== false) {
+        $data = json_decode($json, true);
+        if (isset($data['tag_name'])) {
+            return ltrim($data['tag_name'], 'v');
+        }
+    }
+    
+    // Fallback: fetch tags list if releases are rate-limited or not configured
+    $urlTags = "https://api.github.com/repos/CodeSignificant/api-pro/tags";
+    $jsonTags = @file_get_contents($urlTags, false, $context);
+    if ($jsonTags !== false) {
+        $dataTags = json_decode($jsonTags, true);
+        if (is_array($dataTags) && isset($dataTags[0]['name'])) {
+            return ltrim($dataTags[0]['name'], 'v');
+        }
+    }
+    
+    return 'Unknown';
 }

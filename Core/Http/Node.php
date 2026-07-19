@@ -32,11 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 
 
+/**
+ * @deprecated Use Request class instead.
+ */
 class Node {
     /**
      * Get query parameters (?key=value)
+     * @deprecated Use Request class instead.
      */
     public static function params(array $requiredKeys = []): array {
+        if (!headers_sent()) {
+            header("X-ApiPro-Warning: Node class is deprecated. Please migrate to Request class.", false);
+        }
         $data = $_GET ?? [];
         if (empty($data)) $data = $_POST; // fallback for POST
         if (empty($requiredKeys)) return $data;
@@ -44,7 +51,7 @@ class Node {
         // Validate required keys
         foreach ($requiredKeys as $key) {
             if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
-                $err = new DataFailed("Missing or invalid values", 400);
+                $err = new DataFailed("Missing or invalid value: '$key'", 400);
                 $err->response();
             }
         }
@@ -53,8 +60,12 @@ class Node {
     }
     /**
      * Get JSON body payload from POST, PATCH, DELETE, etc.
+     * @deprecated Use Request class instead.
      */
     public static function body(array $requiredKeys = []): array {
+        if (!headers_sent()) {
+            header("X-ApiPro-Warning: Node class is deprecated. Please migrate to Request class.", false);
+        }
         // Read raw input (needed for PATCH, DELETE)
         $raw = file_get_contents('php://input');
         $data = json_decode($raw, true);
@@ -85,8 +96,12 @@ class Node {
      * Example:
      * $files = Node::getFiles();
      * $avatar = Node::getFiles(['avatar']);
+     * @deprecated Use Request class instead.
      */
     public static function files(array $requiredKeys = []): array {
+        if (!headers_sent()) {
+            header("X-ApiPro-Warning: Node class is deprecated. Please migrate to Request class.", false);
+        }
         $files = [];
 
         if (!empty($_FILES)) {
@@ -122,7 +137,7 @@ class Node {
         if (!empty($requiredKeys)) {
             foreach ($requiredKeys as $key) {
                 if (!isset($files[$key]) || empty($files[$key]['name'])) {
-                    $err = new DataFailed("Missing required file", 400);
+                    $err = new DataFailed("Missing or invalid value: '$key'", 400);
                     $err->response();
                 }
             }
@@ -130,9 +145,4 @@ class Node {
 
         return $files;
     }
-    
-    
-    
-    
-    
 }

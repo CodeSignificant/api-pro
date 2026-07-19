@@ -56,17 +56,17 @@ class ProductController
     }
 
     #[Post('/purchase')]
-    public function purchase()
+    public function purchase($request)
     {
         // 1. Authenticate and resolve session context
         $session = Session::Get(); 
         $userId = $session['id'];
 
-        // 2. Validate mandatory request body arguments
-        $body = Node::body(['productId']);
+        // 2. Validate mandatory request body arguments (throws 400 if missing or invalid)
+        $productId = $request->body->getString('productId');
 
         // 3. Delegate to the pure service
-        return $this->service->purchaseProduct($userId, $body['productId']);
+        return $this->service->purchaseProduct($userId, $productId);
     }
 }
 ```
@@ -96,7 +96,65 @@ class ProductService
 
 ---
 
-## 2. Standardized JSON Envelope Contract
+## 2. Request Handling & Parameter Validation (Deprecated: Node)
+
+ApiPro introduces the object-oriented `Request` class for extracting and validating input parameters.
+
+### Request Injection
+Controller methods access the current HTTP request by accepting a `$request` parameter (which is injected automatically by the router):
+
+```php
+#[Post('/user-details')]
+public function showDetails($request)
+{
+    // Access GET/POST query parameters
+    $request->params->getString('key');
+    
+    // Access POST/PATCH/DELETE JSON or form body
+    $request->body->getInt('key');
+
+    // Access uploaded files
+    $request->files->getFile('avatar');
+}
+```
+
+### Type-Safe Retrieval & Validation Rules
+The `$request->body`, `$request->params`, and `$request->files` sub-properties (instances of `RequestData`) provide type-specific methods that cast values and handle validation:
+
+* `getString(string $key, $default = null): string`
+* `getInt(string $key, $default = null): int`
+* `getFloat(string $key, $default = null): float`
+* `getBool(string $key, $default = null): bool`
+* `getArray(string $key, $default = null): array`
+* `getObject(string $key, $default = null)`
+* `getFile(string $key, $default = null)`
+* `getFiles(string $key = null, $default = null)`
+
+#### Mandatory vs Optional Parameters:
+1. **Mandatory**: If the second argument (`$default`) is **omitted** (checked via argument count), the parameter is treated as required. If it is missing or fails the type validation, the request automatically halts and returns a standard `400 Bad Request` validation response (`DataFailed`) detailing the missing key.
+2. **Optional**: If a default value is provided, the key is treated as optional, and the default value is returned if the parameter is missing or invalid.
+
+### Endpoint Documentation (`addComment`)
+You can document an endpoint inside its controller method using `$request->addComment("Read me description")`. The static router analysis parses these comments and displays them in the interactive tester UI:
+
+```php
+#[Post('/book')]
+public function bookRoom($request)
+{
+    $request->addComment("This endpoint accepts a booking. Requires roomId (int) and description (string).");
+    ...
+}
+```
+
+### Legacy Node Class (Deprecated)
+The static `Node` class (`Node::body()`, `Node::params()`, `Node::files()`) is deprecated. Existing usages are fully backward compatible but will log and trigger deprecation headers:
+```http
+X-ApiPro-Warning: Node class is deprecated. Please migrate to Request class.
+```
+
+---
+
+## 3. Standardized JSON Envelope Contract
 
 All success responses returned by the framework are automatically formatted using a unified, clean three-key envelope:
 
@@ -120,7 +178,7 @@ If a request fails, a clean error structure is returned:
 
 ---
 
-## 3. High-Concurrency Distributed Locks (`ProLock`)
+## 4. High-Concurrency Distributed Locks (`ProLock`)
 
 Protect critical pathways (deducting balances, booking hotel rooms, checking out shopping carts) from double-spend and race conditions with native Redis-backed mutexes:
 
@@ -139,7 +197,7 @@ try {
 
 ---
 
-## 4. Multi-Device Stateful Session Security
+## 5. Multi-Device Stateful Session Security
 
 ApiPro provides full session control with customizable maximum device limits:
 
@@ -149,7 +207,7 @@ ApiPro provides full session control with customizable maximum device limits:
 
 ---
 
-## 5. Config-Driven Automatic Schema Sync & 3-Tier Locks
+## 6. Config-Driven Automatic Schema Sync & 3-Tier Locks
 
 ApiPro introduces a base `Repository` (backed by `ProRepository`) class that automatically synchronizes database table schemas declared inside child constructors, managed globally or protected by a robust 3-tier lock system.
 
@@ -168,7 +226,7 @@ If locked at any level, the engine will still auto-create the table if it's miss
 
 ---
 
-## 6. Symmetric Data Encryption Layer
+## 7. Symmetric Data Encryption Layer
 
 ApiPro features a dedicated symmetric data encryption layer for response payloads. This encrypts the value of the `"data"` key in all success and failure response envelopes.
 
@@ -192,7 +250,7 @@ return new DataSuccess("Message", $data, 200, 'custom_secret_key');
 
 ---
 
-## 7. Running and Setting Up the Project
+## 8. Running and Setting Up the Project
 
 ### Local Development Server
 To start the built-in PHP development server, run from the project root:
@@ -215,7 +273,7 @@ The server will be running on `http://127.0.0.1:8000`.
 
 ---
 
-## 8. ApiPro CLI Tool
+## 9. ApiPro CLI Tool
 
 The framework includes a CLI companion tool in the project root: `api-pro`.
 
@@ -271,9 +329,22 @@ composer install
      ```
 
 
----
-
 ## Release Notes & Updates
+
+### Version 2.4.0 Release Notes
+
+ApiPro `v2.4.0` focuses on improving request input validation, parameter type safety, and inline endpoint documentation.
+
+- **Object-Oriented Request & RequestData Classes**:
+  - Replaced the deprecated static `Node` utility class with a dynamically injected `Request` instance.
+  - Implemented type-safe helper getters: `getString`, `getInt`, `getFloat`, `getBool`, `getArray`, `getObject`, `getFile`, and `getFiles`.
+  - Checking for argument count automatically enforces mandatory/optional parameters. Omitting the default value validates input presence and returns a `400 Bad Request` on failure, while including a default value makes it optional.
+- **Backward Compatibility & Warning Headers**:
+  - Full backward compatibility for controllers using `Node::body()`, `Node::params()`, or `Node::files()`.
+  - Generates an `X-ApiPro-Warning` header and flags routes in the debugger console if they continue to use the legacy `Node` class.
+- **Dynamic Endpoint Documentation (`addComment`)**:
+  - Supported adding README documentation to route methods using `$request->addComment("...")`.
+  - Statically extracts comments and renders them within a dedicated read-me section in the API Tester UI.
 
 ### Version 2.3.0 Release Notes
 
@@ -300,7 +371,7 @@ ApiPro `v2.3.0` focuses on modularizing the debugger tools, introducing global u
 To update your existing ApiPro project to this latest release, execute the built-in updater command from your terminal:
 
 ```bash
-php api-pro update 2.3.0
+php api-pro update 2.4.0
 ```
 
 The updater will download the specified release, safely perform a fresh overwrite of the framework `Core/` directory, and verify your updated setup while keeping your custom `lib/` controllers/services and `config.php` files untouched.
