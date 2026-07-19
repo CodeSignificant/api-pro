@@ -121,5 +121,21 @@ class HomeController
         Log::info("HomeController::rawJson() - Response created with status 201.");
         return $response;
     }
+
+    #[Post('/request-demo')]
+    public function requestDemo($request)
+    {
+        $request->addComment("This endpoint demonstrates the new Request class. It accepts a required name (string), age (int), and an optional active status (bool, default true).");
+        
+        $name = $request->body->getString('name');
+        $age = $request->body->getInt('age');
+        $active = $request->body->getBool('active', true);
+        
+        return new DataSuccess("Demo success!", [
+            'name' => $name,
+            'age' => $age,
+            'active' => $active
+        ]);
+    }
 }
 

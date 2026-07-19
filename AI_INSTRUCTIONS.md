@@ -15,10 +15,11 @@ ApiPro strictly separates concerns across three core architectural layers to gua
 - Registered via modern declarative attributes: `#[Controller('/v1/path')]`, `#[Get('/route')]`, `#[Post('/route')]`.
 - **STRICT FOLDER CONSTRAINT**: All controller files and classes **MUST** be created inside the `lib/controller/` directory. You are strictly forbidden from placing controller classes in any other folder (such as `lib/service/`, `lib/repo/`, or the project root). The framework runs a startup/compile-time validation check on request initialization; defining any class with the `#[Controller]` attribute outside this directory will trigger a fatal `Compile Error` and halt execution.
 - **Responsibilities**:
-  1. Parses raw HTTP requests using static helpers: `Node::body()`, `Node::params()`, `Node::files()`.
-  2. Resolves and validates security sessions: `Session::Get($expectedRole)`.
-  3. Translates HTTP-level details (session ID, device ID) into simple, primitive values.
-  4. Delegates business rules to the Service Layer and forwards the returned `DataResponse`.
+  1. Accepts the automatically injected `$request` object as an argument in the action method.
+  2. Extracts and validates request parameters using the type-safe getters: `$request->body->getString('key')`, `$request->params->getInt('key')`, etc.
+  3. Resolves and validates security sessions: `Session::Get($expectedRole)`.
+  4. Translates HTTP-level details (session ID, device ID) into simple, primitive values.
+  5. Delegates business rules to the Service Layer and forwards the returned `DataResponse`.
 
 ### 2. Service Layer (`lib/service/`)
 - Contains **pure, state-free business logic**.
@@ -74,13 +75,16 @@ class UserController
     }
 
     #[Post('/register')]
-    public function register()
+    public function register($request)
     {
-        // 1. Mandatory Body Param Validation (throws 400 if missing)
-        $body = Node::body(['email', 'password']);
+        $request->addComment("Registers a new user. Expects email (string) and password (string).");
+
+        // 1. Mandatory Body Param Validation (throws 400 if missing or invalid type)
+        $email = $request->body->getString('email');
+        $password = $request->body->getString('password');
         
         // 2. Delegate to state-free service
-        return $this->service->createUser($body['email'], $body['password']);
+        return $this->service->createUser($email, $password);
     }
 
     #[Get('/profile')]
@@ -96,10 +100,28 @@ class UserController
 }
 ```
 
-### Request Extraction Methods:
-- **Query Params**: `Node::params(['key1', 'key2'])`
-- **JSON Body**: `Node::body(['email', 'password'])`
-- **Files**: `Node::files(['avatar'])`
+### Request Extraction and Type-Safe Getters:
+Action methods should accept a `$request` argument (an instance of the `Request` class).
+Extract parameters from `$request->body` (POST/PATCH/DELETE body), `$request->params` (GET/POST query parameters), or `$request->files` (file uploads) using the following methods:
+
+* `getString(string $key, $default = null): string`
+* `getInt(string $key, $default = null): int`
+* `getFloat(string $key, $default = null): float`
+* `getBool(string $key, $default = null): bool`
+* `getArray(string $key, $default = null): array`
+* `getObject(string $key, $default = null)`
+* `getFile(string $key, $default = null)`
+* `getFiles(string $key = null, $default = null)`
+
+#### Validation & Defaults
+- **Mandatory**: If you do **not** supply the second `$default` argument, the framework treats the key as required. If the key is missing or fails datatype checks, the framework automatically returns a `400 Bad Request` validation error.
+- **Optional**: If you supply a default value as the second argument, the field becomes optional. If missing, it falls back to the default value.
+
+#### Dynamic Endpoint Documentation (`addComment`)
+Always use `$request->addComment("Read me description")` inside your action methods to document requirements and explain behavior. The framework extracts this comment to render it in the tester dashboard.
+
+#### Legacy Node Class (Deprecated)
+Avoid using `Node::body()`, `Node::params()`, and `Node::files()`. They are deprecated.
 
 ---
 
@@ -181,12 +203,12 @@ class ProductController {
     }
 
     #[Post('/purchase')]
-    public function purchase() {
+    public function purchase($request) {
         $session = Session::Get();
         $userId = $session['id'];
         
-        $body = Node::body(['productId']);
-        return $this->service->purchaseProduct($userId, $body['productId']);
+        $productId = $request->body->getString('productId');
+        return $this->service->purchaseProduct($userId, $productId);
     }
 }
 

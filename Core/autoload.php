@@ -6,7 +6,7 @@
 
 if (defined('APIPRO_AUTOLOADED')) return;
 define('APIPRO_AUTOLOADED', true);
-define('APIPRO_VERSION', '2.3.1');
+define('APIPRO_VERSION', '2.4.0');
 
 $ROOT = getcwd();
 
@@ -35,6 +35,7 @@ require_once $core . '/Http/Attributes/Put.php';
 require_once $core . '/Http/Attributes/Patch.php';
 require_once $core . '/Http/Attributes/Delete.php';
 require_once $core . '/Http/Node.php';
+require_once $core . '/Http/Request.php';
 require_once $core . '/Database/ProSql.php';
 require_once $core . '/Database/ProRepository.php';
 require_once $core . '/Security/Token.php';
