@@ -1,1 +1,10 @@
-Test log entry from ApiPro
+Test log entry from ApiPro[19-Jul-2026 19:09:33 UTC] [2026-07-19 19:09:33] [INFO] Request: GET /
+[19-Jul-2026 19:09:33 UTC] [2026-07-19 19:09:33] [ERROR] Response: GET / - Status: 404
+[19-Jul-2026 19:09:33 UTC] [2026-07-19 19:09:33] [INFO] Request: GET /favicon.ico
+[19-Jul-2026 19:09:33 UTC] [2026-07-19 19:09:33] [ERROR] Response: GET /favicon.ico - Status: 404
+[19-Jul-2026 19:40:21 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[19-Jul-2026 19:40:21 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 243
+[19-Jul-2026 19:40:21 UTC] [2026-07-19 19:40:21] [INFO] Request: GET /
+[19-Jul-2026 19:40:21 UTC] [2026-07-19 19:40:21] [ERROR] Response: GET / - Status: 404
+[19-Jul-2026 19:40:21 UTC] [2026-07-19 19:40:21] [INFO] Request: GET /favicon.ico
+[19-Jul-2026 19:40:21 UTC] [2026-07-19 19:40:21] [ERROR] Response: GET /favicon.ico - Status: 404

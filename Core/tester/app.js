@@ -169,7 +169,7 @@ function selectRoute(route, element) {
     document.getElementById('responseBody').innerHTML = 'Awaiting request...';
     document.getElementById('responseStatus').style.display = 'none';
     document.getElementById('responseTime').innerText = '';
-    
+
     const tabsEl = document.getElementById('responseTabs');
     if (tabsEl) tabsEl.style.display = 'none';
     const headersEl = document.getElementById('responseHeaders');
@@ -245,7 +245,10 @@ function buildBodySection(route) {
             group.className = 'form-group';
             group.innerHTML = `
                 <div class="param-label-row">
-                    <label class="form-label" style="margin:0;">${param}</label>
+                    <label class="form-label" style="margin:0; display:flex; align-items:center;">
+                        ${param}
+                        <span style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; margin-left: 8px;">body</span>
+                    </label>
                     <span class="${isRequired ? 'badge-required' : 'badge-optional'}">${isRequired ? 'Required' : 'Optional'}</span>
                 </div>
                 <input type="text" class="form-input" name="param_${param}" data-key="${param}" placeholder="Enter ${param}..." ${isRequired ? 'required' : ''} oninput="saveEndpointInputs()" />
@@ -274,7 +277,10 @@ function buildFormSection(sectionId, containerId, params, required = []) {
         group.className = 'form-group';
         group.innerHTML = `
             <div class="param-label-row">
-                <label class="form-label" style="margin:0;">${param}</label>
+                <label class="form-label" style="margin:0; display:flex; align-items:center;">
+                    ${param}
+                    <span style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; margin-left: 8px;">query</span>
+                </label>
                 <span class="${isRequired ? 'badge-required' : 'badge-optional'}">${isRequired ? 'Required' : 'Optional'}</span>
             </div>
             <input type="text" class="form-input" name="param_${param}" data-key="${param}" placeholder="Enter ${param}..." ${isRequired ? 'required' : ''} oninput="saveEndpointInputs()" />
@@ -300,7 +306,10 @@ function buildFileSection(sectionId, containerId, files, required = []) {
         group.className = 'form-group';
         group.innerHTML = `
             <div class="param-label-row">
-                <label class="form-label" style="margin:0;">${file}</label>
+                <label class="form-label" style="margin:0; display:flex; align-items:center;">
+                    ${file}
+                    <span style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.2); font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; margin-left: 8px;">files</span>
+                </label>
                 <span class="${isRequired ? 'badge-required' : 'badge-optional'}">${isRequired ? 'Required' : 'Optional'}</span>
             </div>
             <input type="file" class="form-input" name="file_${file}" data-key="${file}" style="padding: 7px;" />
@@ -645,7 +654,7 @@ function switchResponseTab(tab) {
     const headersTab = document.getElementById('responseHeaders');
     const btnBody = document.getElementById('tabBtnBody');
     const btnHeaders = document.getElementById('tabBtnHeaders');
-    
+
     if (!bodyTab || !headersTab || !btnBody || !btnHeaders) return;
 
     if (tab === 'body') {

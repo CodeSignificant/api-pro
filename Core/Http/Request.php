@@ -3,6 +3,7 @@
 class Request {
     public RequestData $body;
     public RequestData $params;
+    public RequestData $query;
     public RequestData $files;
     
     private array $comments = [];
@@ -14,6 +15,7 @@ class Request {
             $paramsData = $_POST;
         }
         $this->params = new RequestData($paramsData, 'params');
+        $this->query = new RequestData($paramsData, 'query');
 
         // Parse body (POST/JSON)
         $raw = file_get_contents('php://input');
@@ -66,55 +68,37 @@ class Request {
         return $this->comments;
     }
 
-    // Direct type-safe lookup delegators (checks body first, then params)
+    // Direct getter calls are disabled - users must specify body or query/params
     public function getString(string $key, $default = null): string {
-        if ($this->body->has($key)) {
-            return $this->body->getString($key, ...array_slice(func_get_args(), 1));
-        }
-        return $this->params->getString($key, ...array_slice(func_get_args(), 1));
+        throw new Exception("Direct getter call '\$request->getString()' is not allowed. Please specify whether you want to retrieve it from 'body' or 'query' (e.g., '\$request->body->getString()' or '\$request->query->getString()').");
     }
 
     public function getInt(string $key, $default = null): int {
-        if ($this->body->has($key)) {
-            return $this->body->getInt($key, ...array_slice(func_get_args(), 1));
-        }
-        return $this->params->getInt($key, ...array_slice(func_get_args(), 1));
+        throw new Exception("Direct getter call '\$request->getInt()' is not allowed. Please specify whether you want to retrieve it from 'body' or 'query' (e.g., '\$request->body->getInt()' or '\$request->query->getInt()').");
     }
 
     public function getFloat(string $key, $default = null): float {
-        if ($this->body->has($key)) {
-            return $this->body->getFloat($key, ...array_slice(func_get_args(), 1));
-        }
-        return $this->params->getFloat($key, ...array_slice(func_get_args(), 1));
+        throw new Exception("Direct getter call '\$request->getFloat()' is not allowed. Please specify whether you want to retrieve it from 'body' or 'query' (e.g., '\$request->body->getFloat()' or '\$request->query->getFloat()').");
     }
 
     public function getBool(string $key, $default = null): bool {
-        if ($this->body->has($key)) {
-            return $this->body->getBool($key, ...array_slice(func_get_args(), 1));
-        }
-        return $this->params->getBool($key, ...array_slice(func_get_args(), 1));
+        throw new Exception("Direct getter call '\$request->getBool()' is not allowed. Please specify whether you want to retrieve it from 'body' or 'query' (e.g., '\$request->body->getBool()' or '\$request->query->getBool()').");
     }
 
     public function getArray(string $key, $default = null): array {
-        if ($this->body->has($key)) {
-            return $this->body->getArray($key, ...array_slice(func_get_args(), 1));
-        }
-        return $this->params->getArray($key, ...array_slice(func_get_args(), 1));
+        throw new Exception("Direct getter call '\$request->getArray()' is not allowed. Please specify whether you want to retrieve it from 'body' or 'query' (e.g., '\$request->body->getArray()' or '\$request->query->getArray()').");
     }
 
     public function getObject(string $key, $default = null) {
-        if ($this->body->has($key)) {
-            return $this->body->getObject($key, ...array_slice(func_get_args(), 1));
-        }
-        return $this->params->getObject($key, ...array_slice(func_get_args(), 1));
+        throw new Exception("Direct getter call '\$request->getObject()' is not allowed. Please specify whether you want to retrieve it from 'body' or 'query' (e.g., '\$request->body->getObject()' or '\$request->query->getObject()').");
     }
 
     public function getFile(string $key, $default = null) {
-        return $this->files->getFile($key, ...array_slice(func_get_args(), 1));
+        throw new Exception("Direct getter call '\$request->getFile()' is not allowed. Please specify whether you want to retrieve it from 'files' (e.g., '\$request->files->getFile()').");
     }
 
     public function getFiles(string $key = null, $default = null) {
-        return $this->files->getFiles($key, ...array_slice(func_get_args(), 1));
+        throw new Exception("Direct getter call '\$request->getFiles()' is not allowed. Please specify whether you want to retrieve them from 'files' (e.g., '\$request->files->getFiles()').");
     }
 }
 
