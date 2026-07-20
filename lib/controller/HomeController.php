@@ -137,5 +137,19 @@ class HomeController
             'active' => $active
         ]);
     }
+    #[Post('/upload-image-demo')]
+    public function uploadImageDemo(Request $request)
+    {
+        $request->addComment("This endpoint demonstrates the new multipart property on the Request class.");
+        
+        $images = $request->multipart->getFiles("images");
+        echo json_encode($images);
+        
+        
+        return new DataSuccess("Images received successfully!", [
+            'file_name' => $images[0]['name'],
+            'size' => $images[0]['size']
+        ]);
+    }
 }
 

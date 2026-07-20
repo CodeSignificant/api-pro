@@ -114,12 +114,12 @@ public function showDetails($request)
     $request->body->getInt('key');
 
     // Access uploaded files
-    $request->files->getFile('avatar');
+    $request->multipart->getFile('avatar');
 }
 ```
 
 ### Type-Safe Retrieval & Validation Rules
-The `$request->body`, `$request->params`, and `$request->files` sub-properties (instances of `RequestData`) provide type-specific methods that cast values and handle validation:
+The `$request->body`, `$request->params`, and `$request->multipart` sub-properties (instances of `RequestData`) provide type-specific methods that cast values and handle validation:
 
 * `getString(string $key, $default = null): string`
 * `getInt(string $key, $default = null): int`
@@ -127,8 +127,8 @@ The `$request->body`, `$request->params`, and `$request->files` sub-properties (
 * `getBool(string $key, $default = null): bool`
 * `getArray(string $key, $default = null): array`
 * `getObject(string $key, $default = null)`
-* `getFile(string $key, $default = null)`
-* `getFiles(string $key = null, $default = null)`
+* `getFile(string $key, bool $mandatory = true)`
+* `getFiles(string $key = null, bool $mandatory = true)`
 
 #### Mandatory vs Optional Parameters:
 1. **Mandatory**: If the second argument (`$default`) is **omitted** (checked via argument count), the parameter is treated as required. If it is missing or fails the type validation, the request automatically halts and returns a standard `400 Bad Request` validation response (`DataFailed`) detailing the missing key.
@@ -337,7 +337,7 @@ ApiPro `v2.4.1` enforces explicit source targeting on all request getters and in
 
 - **Enforced Explicit Source Targeting**:
   - Direct getter calls on the `Request` object (e.g. `$request->getString()`) now throw an `Exception` at runtime with a clear developer message.
-  - All getters **must** now be called on a specific source: `$request->body->getString()`, `$request->query->getString()`, or `$request->files->getFile()`.
+  - All getters **must** now be called on a specific source: `$request->body->getString()`, `$request->query->getString()`, or `$request->multipart->getFile()`.
   - This prevents ambiguity about where a value is sourced and makes controller intent immediately clear.
 - **New `query` Property Alias**:
   - Added `$request->query` as a semantic alias for `$request->params`, allowing more expressive and idiomatic code (e.g. `$request->query->getInt('page', 1)`).
@@ -346,8 +346,12 @@ ApiPro `v2.4.1` enforces explicit source targeting on all request getters and in
   - The interactive tester now renders colored source tags alongside each parameter field.
   - 🟡 `body` — amber badge for body-sourced parameters (`$request->body->...`)
   - 🟢 `query` — green badge for query-string parameters (`$request->query->...` or `$request->params->...`)
-  - 🟣 `files` — purple badge for file upload fields (`$request->files->...`)
+  - 🟣 `multipart` — purple badge for single file upload fields (`$request->multipart->getFile()`)
+  - 🟣 `multipart (array)` — purple badge for multiple file upload fields (`$request->multipart->getFiles()`)
   - Source badges are derived from static analysis of controller code in `ProTestService.php`.
+- **Strict Multipart Array Typing**:
+  - `getFile(string $key, bool $mandatory = true)` now strictly enforces a single file upload, rejecting array uploads.
+  - `getFiles(string $key = null, bool $mandatory = true)` strictly enforces multiple files (arrays), and the API Tester UI automatically configures the HTML input to support `multiple` and formats the form data accurately with `[]` brackets.
 - **CLI: `start` / `serve` Command**:
   - Added `php api-pro start` to launch the built-in PHP development server.
   - Supports `--port=7070`, `--port 7070`, `-p 7070`, and `--host=0.0.0.0` options. Defaults to `127.0.0.1:7070`.

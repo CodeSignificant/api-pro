@@ -189,7 +189,7 @@ function selectRoute(route, element) {
     // Build Forms
     buildFormSection('querySection', 'queryFields', route.params || [], route.required_params || []);
     buildBodySection(route);
-    buildFileSection('fileSection', 'fileFields', route.files || [], route.required_files || []);
+    buildFileSection('fileSection', 'fileFields', route.files || [], route.required_files || [], route.multiple_files || [], route.required_multiple_files || []);
 
     // Deprecation Warning Toggle
     const depEl = document.getElementById('deprecationWarning');
@@ -285,17 +285,18 @@ function buildFormSection(sectionId, containerId, params, required = []) {
     });
 }
 
-function buildFileSection(sectionId, containerId, files, required = []) {
+function buildFileSection(sectionId, containerId, files, required = [], multipleFiles = [], requiredMultiple = []) {
     const section = document.getElementById(sectionId);
     const container = document.getElementById(containerId);
     container.innerHTML = '';
 
-    if (files.length === 0) {
+    if (files.length === 0 && multipleFiles.length === 0) {
         section.style.display = 'none';
         return;
     }
 
     section.style.display = 'block';
+    
     files.forEach(file => {
         const isRequired = required.includes(file);
         const group = document.createElement('div');
@@ -304,11 +305,28 @@ function buildFileSection(sectionId, containerId, files, required = []) {
             <div class="param-label-row">
                 <label class="form-label" style="margin:0; display:flex; align-items:center;">
                     ${file}
-                    <span style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.2); font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; margin-left: 8px;">files</span>
+                    <span style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.2); font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; margin-left: 8px;">multipart</span>
                 </label>
                 <span class="${isRequired ? 'badge-required' : 'badge-optional'}">${isRequired ? 'Required' : 'Optional'}</span>
             </div>
             <input type="file" class="form-input" name="file_${file}" data-key="${file}" style="padding: 7px;" />
+        `;
+        container.appendChild(group);
+    });
+
+    multipleFiles.forEach(file => {
+        const isRequired = requiredMultiple.includes(file);
+        const group = document.createElement('div');
+        group.className = 'form-group';
+        group.innerHTML = `
+            <div class="param-label-row">
+                <label class="form-label" style="margin:0; display:flex; align-items:center;">
+                    ${file}
+                    <span style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.2); font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; margin-left: 8px;">multipart (array)</span>
+                </label>
+                <span class="${isRequired ? 'badge-required' : 'badge-optional'}">${isRequired ? 'Required' : 'Optional'}</span>
+            </div>
+            <input type="file" multiple class="form-input" name="file_${file}" data-key="${file}" style="padding: 7px;" />
         `;
         container.appendChild(group);
     });
@@ -361,7 +379,15 @@ async function sendRequest() {
                 if (input.value) formData.append(input.dataset.key, input.value);
             });
             fileInputs.forEach(input => {
-                if (input.files.length > 0) formData.append(input.dataset.key, input.files[0]);
+                if (input.files.length > 0) {
+                    if (input.hasAttribute('multiple')) {
+                        for (let i = 0; i < input.files.length; i++) {
+                            formData.append(input.dataset.key + '[]', input.files[i]);
+                        }
+                    } else {
+                        formData.append(input.dataset.key, input.files[0]);
+                    }
+                }
             });
             options.body = formData;
         } else if (rawBodyInput) {
@@ -444,7 +470,15 @@ function copyCurl() {
             if (input.value) curl += ` -F "${input.dataset.key}=${input.value}"`;
         });
         fileInputs.forEach(input => {
-            if (input.files.length > 0) curl += ` -F "${input.dataset.key}=@/path/to/${input.files[0].name}"`;
+            if (input.files.length > 0) {
+                if (input.hasAttribute('multiple')) {
+                    for (let i = 0; i < input.files.length; i++) {
+                        curl += ` -F "${input.dataset.key}[]=@/path/to/${input.files[i].name}"`;
+                    }
+                } else {
+                    curl += ` -F "${input.dataset.key}=@/path/to/${input.files[0].name}"`;
+                }
+            }
         });
     } else if (rawBodyInput && currentRoute.method !== 'GET' && currentRoute.method !== 'HEAD') {
         curl += ` -H "Content-Type: application/json" -d '${rawBodyInput.value.replace(/'/g, "'\\''")}'`;

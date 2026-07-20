@@ -42,6 +42,8 @@ class ProTestService
                     'raw_body'        => $params['raw_body'] ?? false,
                     'files'           => $params['files'],
                     'required_files'  => $params['required_files'],
+                    'multiple_files'  => $params['multiple_files'],
+                    'required_multiple_files' => $params['required_multiple_files'],
                     'deprecated'      => $params['deprecated'] ?? false,
                     'comment'         => $params['comment'] ?? '',
                 ];
@@ -59,6 +61,8 @@ class ProTestService
         $requiredBody  = [];
         $files         = [];
         $requiredFiles = [];
+        $multipleFiles = [];
+        $requiredMultipleFiles = [];
         $rawBody       = false;
         $deprecated    = false;
         $comment       = '';
@@ -126,7 +130,7 @@ class ProTestService
 
                 // --- MODERN REQUEST SYNTAX PARSING ---
                 // Extract parameters from calls like $request->body->getString("key") or $request->query->getString("key")
-                $requestRegex = '/\$[a-zA-Z0-9_]+->(body|params|query|files)->(getString|getInt|getFloat|getBool|getArray|getObject|getFile|getFiles|get)\(\s*(["\'])(.*?)\3\s*(?:,\s*([^)]+))?\)/s';
+                $requestRegex = '/\$[a-zA-Z0-9_]+->(body|params|query|multipart)->(getString|getInt|getFloat|getBool|getArray|getObject|getFile|getFiles|get)\(\s*(["\'])(.*?)\3\s*(?:,\s*([^)]+))?\)/s';
                 preg_match_all($requestRegex, $code, $requestMatches, PREG_SET_ORDER);
 
                 foreach ($requestMatches as $match) {
@@ -140,7 +144,9 @@ class ProTestService
                         $category = 'query';
                     } elseif ($prop === 'body') {
                         $category = 'body';
-                    } elseif ($prop === 'files' || $method === 'getFile' || $method === 'getFiles') {
+                    } elseif ($method === 'getFiles') {
+                        $category = 'multiple_files';
+                    } elseif ($prop === 'multipart' || $method === 'getFile') {
                         $category = 'files';
                     }
 
@@ -154,10 +160,26 @@ class ProTestService
                         if (!$hasDefault) {
                             $requiredBody[] = $key;
                         }
-                    } elseif ($category === 'files') {
-                        $files[] = $key;
-                        if (!$hasDefault) {
-                            $requiredFiles[] = $key;
+                    } elseif ($category === 'files' || $category === 'multiple_files') {
+                        if ($category === 'files') {
+                            $files[] = $key;
+                        } else {
+                            $multipleFiles[] = $key;
+                        }
+                        
+                        $isMandatory = true;
+                        if ($hasDefault) {
+                            $arg2 = strtolower(trim($match[5]));
+                            if ($arg2 === 'false' || strpos($arg2, 'false') !== false) {
+                                $isMandatory = false;
+                            }
+                        }
+                        if ($isMandatory) {
+                            if ($category === 'files') {
+                                $requiredFiles[] = $key;
+                            } else {
+                                $requiredMultipleFiles[] = $key;
+                            }
                         }
                     }
                 }
@@ -199,6 +221,8 @@ class ProTestService
             'raw_body'       => $rawBody,
             'files'          => array_values(array_unique($files)),
             'required_files' => array_values(array_unique($requiredFiles)),
+            'multiple_files'          => array_values(array_unique($multipleFiles)),
+            'required_multiple_files' => array_values(array_unique($requiredMultipleFiles)),
             'deprecated'     => $deprecated,
             'comment'        => $comment,
         ];
