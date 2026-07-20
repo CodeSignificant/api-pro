@@ -110,14 +110,14 @@ class DummyController
     #[Get('/info')]
     public function info(Request $request)
     {
-        return new DataSuccess('info', ['framework' => 'ApiPro', 'version' => '2.4.1']);
+        return new DataSuccess('info', ['framework' => 'ApiPro', 'version' => '2.4.2']);
     }
 
     // Version
     #[Get('/version')]
     public function version(Request $request)
     {
-        return new DataSuccess('version', ['version' => '2.4.1']);
+        return new DataSuccess('version', ['version' => '2.4.2']);
     }
 
     // Extra endpoints 1-12
