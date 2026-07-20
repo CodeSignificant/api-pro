@@ -4,7 +4,7 @@ class Request {
     public RequestData $body;
     public RequestData $params;
     public RequestData $query;
-    public RequestData $files;
+    public RequestData $multipart;
     
     private array $comments = [];
 
@@ -25,9 +25,9 @@ class Request {
         }
         $this->body = new RequestData($bodyData, 'body');
 
-        // Parse files
+        // Parse multipart files
         $filesData = $this->parseFiles();
-        $this->files = new RequestData($filesData, 'files');
+        $this->multipart = new RequestData($filesData, 'multipart');
     }
 
     private function parseFiles(): array {
@@ -93,12 +93,12 @@ class Request {
         throw new Exception("Direct getter call '\$request->getObject()' is not allowed. Please specify whether you want to retrieve it from 'body' or 'query' (e.g., '\$request->body->getObject()' or '\$request->query->getObject()').");
     }
 
-    public function getFile(string $key, $default = null) {
-        throw new Exception("Direct getter call '\$request->getFile()' is not allowed. Please specify whether you want to retrieve it from 'files' (e.g., '\$request->files->getFile()').");
+    public function getFile(string $key, bool $mandatory = true) {
+        throw new Exception("Direct getter call '\$request->getFile()' is not allowed. Please specify whether you want to retrieve it from 'multipart' (e.g., '\$request->multipart->getFile()').");
     }
 
-    public function getFiles(string $key = null, $default = null) {
-        throw new Exception("Direct getter call '\$request->getFiles()' is not allowed. Please specify whether you want to retrieve them from 'files' (e.g., '\$request->files->getFiles()').");
+    public function getFiles(string $key = null, bool $mandatory = true) {
+        throw new Exception("Direct getter call '\$request->getFiles()' is not allowed. Please specify whether you want to retrieve them from 'multipart' (e.g., '\$request->multipart->getFiles()').");
     }
 }
 
@@ -219,11 +219,18 @@ class RequestData {
         );
     }
 
-    public function getFile(string $key, $default = null) {
-        $defaultExists = func_num_args() >= 2;
+    public function getFile(string $key, bool $mandatory = true) {
         $file = $this->data[$key] ?? null;
         $hasFile = ($file !== null);
         if ($hasFile && is_array($file)) {
+            if (isset($file[0])) {
+                if ($mandatory) {
+                    $err = new DataFailed("Expected single file for '$key', but got multiple.", 400);
+                    $err->response();
+                }
+                return null;
+            }
+
             if (isset($file['error']) && $file['error'] === UPLOAD_ERR_NO_FILE) {
                 $hasFile = false;
             } elseif (empty($file['name'])) {
@@ -231,35 +238,49 @@ class RequestData {
             }
         }
         if (!$hasFile) {
-            if (!$defaultExists) {
-                $err = new DataFailed("Missing or invalid value: '$key'", 400);
+            if ($mandatory) {
+                $err = new DataFailed("Missing or invalid single file: '$key'", 400);
                 $err->response();
             }
-            return $default;
+            return null;
         }
         return $file;
     }
 
-    public function getFiles(string $key = null, $default = null) {
-        $defaultExists = func_num_args() >= 2;
+    public function getFiles(string $key = null, bool $mandatory = true) {
         if ($key === null) {
             return $this->data;
         }
         $file = $this->data[$key] ?? null;
         $hasFile = ($file !== null);
         if ($hasFile && is_array($file)) {
-            if (isset($file['error']) && $file['error'] === UPLOAD_ERR_NO_FILE) {
-                $hasFile = false;
-            } elseif (empty($file['name']) && (!is_array($file) || empty($file))) {
-                $hasFile = false;
+            if (!isset($file[0]) && isset($file['name'])) {
+                if ($mandatory) {
+                    $err = new DataFailed("Expected multiple files for '$key', but got a single file.", 400);
+                    $err->response();
+                }
+                return null;
+            }
+
+            if (isset($file[0])) {
+                $allEmpty = true;
+                foreach ($file as $f) {
+                    if (!(isset($f['error']) && $f['error'] === UPLOAD_ERR_NO_FILE) && !empty($f['name'])) {
+                        $allEmpty = false;
+                        break;
+                    }
+                }
+                if ($allEmpty) {
+                    $hasFile = false;
+                }
             }
         }
         if (!$hasFile) {
-            if (!$defaultExists) {
-                $err = new DataFailed("Missing or invalid value: '$key'", 400);
+            if ($mandatory) {
+                $err = new DataFailed("Missing or invalid multiple files: '$key'", 400);
                 $err->response();
             }
-            return $default;
+            return null;
         }
         return $file;
     }

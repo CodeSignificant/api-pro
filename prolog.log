@@ -93,3 +93,21 @@ Stack trace:
 [19-Jul-2026 20:58:46 UTC] [2026-07-19 20:58:46] [ERROR] Response: GET /tester/routes - Status: 404
 [19-Jul-2026 21:10:30 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
 [19-Jul-2026 21:10:30 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 243
+[20-Jul-2026 18:10:08 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[20-Jul-2026 18:10:08 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 243
+[20-Jul-2026 18:18:54 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[20-Jul-2026 18:18:54 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 243
+[20-Jul-2026 18:19:26 UTC] [2026-07-20 18:19:26] [INFO] Request: POST /v1/home/upload-image-demo
+[20-Jul-2026 18:19:26 UTC] [2026-07-20 18:19:26] [INFO] Response: POST /v1/home/upload-image-demo - Status: 200
+[20-Jul-2026 18:26:34 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[20-Jul-2026 18:26:34 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 242
+[20-Jul-2026 18:27:45 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[20-Jul-2026 18:27:45 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 242
+[20-Jul-2026 18:27:58 UTC] [2026-07-20 18:27:58] [INFO] Request: POST /v1/home/upload-image-demo
+[20-Jul-2026 18:27:58 UTC] [2026-07-20 18:27:58] [INFO] Response: POST /v1/home/upload-image-demo - Status: 200
+[20-Jul-2026 18:31:38 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[20-Jul-2026 18:31:38 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 250
+[20-Jul-2026 18:31:53 UTC] [2026-07-20 18:31:53] [INFO] Request: POST /v1/home/upload-image-demo
+[20-Jul-2026 18:31:53 UTC] [2026-07-20 18:31:53] [INFO] Response: POST /v1/home/upload-image-demo - Status: 200
+[20-Jul-2026 18:36:06 UTC] [2026-07-20 18:36:06] [INFO] Request: POST /v1/home/upload-image-demo
+[20-Jul-2026 18:36:06 UTC] [2026-07-20 18:36:06] [INFO] Response: POST /v1/home/upload-image-demo - Status: 200
