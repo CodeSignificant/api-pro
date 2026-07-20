@@ -331,6 +331,15 @@ composer install
 
 ## Release Notes & Updates
 
+### Version 2.4.2 Release Notes
+
+ApiPro `v2.4.2` introduces strict typing for multiple and single file uploads, along with inline format validation.
+
+- **Strict Multipart Array Typing & Format Validation**:
+  - `getFile(string $key, bool $mandatory = true, array $allowedFormats = [])` now strictly enforces a single file upload, rejecting array uploads.
+  - `getFiles(string $key = null, bool $mandatory = true, array $allowedFormats = [])` strictly enforces multiple files (arrays), and the API Tester UI automatically configures the HTML input to support `multiple` and formats the form data accurately with `[]` brackets.
+  - Passing an array of extensions to `$allowedFormats` (e.g. `['jpg', 'png']`) will automatically reject any uploads that don't match those extensions with a 400 Bad Request error.
+
 ### Version 2.4.1 Release Notes
 
 ApiPro `v2.4.1` enforces explicit source targeting on all request getters and introduces the `query` property alias.
@@ -349,10 +358,6 @@ ApiPro `v2.4.1` enforces explicit source targeting on all request getters and in
   - 🟣 `multipart` — purple badge for single file upload fields (`$request->multipart->getFile()`)
   - 🟣 `multipart (array)` — purple badge for multiple file upload fields (`$request->multipart->getFiles()`)
   - Source badges are derived from static analysis of controller code in `ProTestService.php`.
-- **Strict Multipart Array Typing & Format Validation**:
-  - `getFile(string $key, bool $mandatory = true, array $allowedFormats = [])` now strictly enforces a single file upload, rejecting array uploads.
-  - `getFiles(string $key = null, bool $mandatory = true, array $allowedFormats = [])` strictly enforces multiple files (arrays), and the API Tester UI automatically configures the HTML input to support `multiple` and formats the form data accurately with `[]` brackets.
-  - Passing an array of extensions to `$allowedFormats` (e.g. `['jpg', 'png']`) will automatically reject any uploads that don't match those extensions with a 400 Bad Request error.
 - **CLI: `start` / `serve` Command**:
   - Added `php api-pro start` to launch the built-in PHP development server.
   - Supports `--port=7070`, `--port 7070`, `-p 7070`, and `--host=0.0.0.0` options. Defaults to `127.0.0.1:7070`.
@@ -406,7 +411,7 @@ ApiPro `v2.3.0` focuses on modularizing the debugger tools, introducing global u
 To update your existing ApiPro project to this latest release, execute the built-in updater command from your terminal:
 
 ```bash
-php api-pro update 2.4.1
+php api-pro update 2.4.2
 ```
 
 The updater will download the specified release, safely perform a fresh overwrite of the framework `Core/` directory, and verify your updated setup while keeping your custom `lib/` controllers/services and `config.php` files untouched.
