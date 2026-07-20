@@ -151,5 +151,80 @@ class HomeController
             'size' => $images[0]['size']
         ]);
     }
+
+    #[Post('/test-all-inputs')]
+    public function testAllInputs(Request $request)
+    {
+        $request->addComment("This endpoint tests all available getters (string, int, float, bool, array, object, file, files) across body, query, and multipart sources.");
+        
+        // Body parameters
+        $title = $request->body->getString("title"); // mandatory string
+        $score = $request->body->getInt("score", 0); // optional int
+        $rating = $request->body->getFloat("rating"); // mandatory float
+        $isPublished = $request->body->getBool("isPublished", false); // optional bool
+        $tags = $request->body->getArray("tags"); // mandatory array
+        $metadata = $request->body->getObject("metadata", ["created" => true]); // optional object
+
+        // Query parameters
+        $page = $request->query->getInt("page", 1); // optional int
+        $search = $request->query->getString("search", ""); // optional string
+
+        // Multipart (Files)
+        $avatar = $request->multipart->getFile("avatar", false, ['jpg', 'png']); // optional single file with format validation
+        $documents = $request->multipart->getFiles("documents", true, ['pdf', 'doc', 'docx']); // mandatory multiple files with format validation
+
+        return new DataSuccess("All inputs received and validated successfully!", [
+            'body_inputs' => [
+                'title' => $title,
+                'score' => $score,
+                'rating' => $rating,
+                'isPublished' => $isPublished,
+                'tags' => $tags,
+                'metadata' => $metadata,
+            ],
+            'query_inputs' => [
+                'page' => $page,
+                'search' => $search,
+            ],
+            'file_inputs' => [
+                'avatar_received' => $avatar !== null,
+                'avatar_name' => $avatar !== null ? $avatar['name'] : null,
+                'documents_count' => count($documents),
+            ]
+        ]);
+    }
+
+    #[Post('/test-all-files')]
+    public function testAllFiles(Request $request)
+    {
+        $request->addComment("This endpoint demonstrates all possible variations of picking files using getFile and getFiles.");
+        
+        // Single Files
+        $imgMandatory = $request->multipart->getFile("img_mandatory"); // Mandatory, no format
+        $imgOptional = $request->multipart->getFile("img_optional", false); // Optional, no format
+        $imgFmtReq = $request->multipart->getFile("img_fmt_req", true, ['jpg', 'png']); // Mandatory, strictly jpg/png
+        $imgFmtOpt = $request->multipart->getFile("img_fmt_opt", false, ['webp', 'svg']); // Optional, strictly webp/svg
+        
+        // Multiple Files (Arrays)
+        $docsMandatory = $request->multipart->getFiles("docs_mandatory"); // Mandatory, no format
+        $docsOptional = $request->multipart->getFiles("docs_optional", false); // Optional, no format
+        $docsFmtReq = $request->multipart->getFiles("docs_fmt_req", true, ['pdf']); // Mandatory, strictly pdf
+        $docsFmtOpt = $request->multipart->getFiles("docs_fmt_opt", false, ['csv', 'txt']); // Optional, strictly csv/txt
+
+        return new DataSuccess("All files received according to their strict rules!", [
+            'single_files' => [
+                'img_mandatory_name' => $imgMandatory['name'],
+                'img_optional_received' => $imgOptional !== null,
+                'img_fmt_req_name' => $imgFmtReq['name'],
+                'img_fmt_opt_received' => $imgFmtOpt !== null,
+            ],
+            'multiple_files' => [
+                'docs_mandatory_count' => count($docsMandatory),
+                'docs_optional_received' => $docsOptional !== null,
+                'docs_fmt_req_count' => count($docsFmtReq),
+                'docs_fmt_opt_received' => $docsFmtOpt !== null,
+            ]
+        ]);
+    }
 }
 
