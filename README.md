@@ -127,8 +127,8 @@ The `$request->body`, `$request->params`, and `$request->multipart` sub-properti
 * `getBool(string $key, $default = null): bool`
 * `getArray(string $key, $default = null): array`
 * `getObject(string $key, $default = null)`
-* `getFile(string $key, bool $mandatory = true)`
-* `getFiles(string $key = null, bool $mandatory = true)`
+* `getFile(string $key, bool $mandatory = true, array $allowedFormats = [])`
+* `getFiles(string $key = null, bool $mandatory = true, array $allowedFormats = [])`
 
 #### Mandatory vs Optional Parameters:
 1. **Mandatory**: If the second argument (`$default`) is **omitted** (checked via argument count), the parameter is treated as required. If it is missing or fails the type validation, the request automatically halts and returns a standard `400 Bad Request` validation response (`DataFailed`) detailing the missing key.
@@ -349,9 +349,10 @@ ApiPro `v2.4.1` enforces explicit source targeting on all request getters and in
   - 🟣 `multipart` — purple badge for single file upload fields (`$request->multipart->getFile()`)
   - 🟣 `multipart (array)` — purple badge for multiple file upload fields (`$request->multipart->getFiles()`)
   - Source badges are derived from static analysis of controller code in `ProTestService.php`.
-- **Strict Multipart Array Typing**:
-  - `getFile(string $key, bool $mandatory = true)` now strictly enforces a single file upload, rejecting array uploads.
-  - `getFiles(string $key = null, bool $mandatory = true)` strictly enforces multiple files (arrays), and the API Tester UI automatically configures the HTML input to support `multiple` and formats the form data accurately with `[]` brackets.
+- **Strict Multipart Array Typing & Format Validation**:
+  - `getFile(string $key, bool $mandatory = true, array $allowedFormats = [])` now strictly enforces a single file upload, rejecting array uploads.
+  - `getFiles(string $key = null, bool $mandatory = true, array $allowedFormats = [])` strictly enforces multiple files (arrays), and the API Tester UI automatically configures the HTML input to support `multiple` and formats the form data accurately with `[]` brackets.
+  - Passing an array of extensions to `$allowedFormats` (e.g. `['jpg', 'png']`) will automatically reject any uploads that don't match those extensions with a 400 Bad Request error.
 - **CLI: `start` / `serve` Command**:
   - Added `php api-pro start` to launch the built-in PHP development server.
   - Supports `--port=7070`, `--port 7070`, `-p 7070`, and `--host=0.0.0.0` options. Defaults to `127.0.0.1:7070`.

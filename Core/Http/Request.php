@@ -93,11 +93,11 @@ class Request {
         throw new Exception("Direct getter call '\$request->getObject()' is not allowed. Please specify whether you want to retrieve it from 'body' or 'query' (e.g., '\$request->body->getObject()' or '\$request->query->getObject()').");
     }
 
-    public function getFile(string $key, bool $mandatory = true) {
+    public function getFile(string $key, bool $mandatory = true, array $allowedFormats = []) {
         throw new Exception("Direct getter call '\$request->getFile()' is not allowed. Please specify whether you want to retrieve it from 'multipart' (e.g., '\$request->multipart->getFile()').");
     }
 
-    public function getFiles(string $key = null, bool $mandatory = true) {
+    public function getFiles(string $key = null, bool $mandatory = true, array $allowedFormats = []) {
         throw new Exception("Direct getter call '\$request->getFiles()' is not allowed. Please specify whether you want to retrieve them from 'multipart' (e.g., '\$request->multipart->getFiles()').");
     }
 }
@@ -219,7 +219,7 @@ class RequestData {
         );
     }
 
-    public function getFile(string $key, bool $mandatory = true) {
+    public function getFile(string $key, bool $mandatory = true, array $allowedFormats = []) {
         $file = $this->data[$key] ?? null;
         $hasFile = ($file !== null);
         if ($hasFile && is_array($file)) {
@@ -235,6 +235,13 @@ class RequestData {
                 $hasFile = false;
             } elseif (empty($file['name'])) {
                 $hasFile = false;
+            } elseif (!empty($allowedFormats)) {
+                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                $allowed = array_map('strtolower', $allowedFormats);
+                if (!in_array($ext, $allowed)) {
+                    $err = new DataFailed("Invalid file format for '$key'. Allowed formats: " . implode(', ', $allowedFormats), 400);
+                    $err->response();
+                }
             }
         }
         if (!$hasFile) {
@@ -247,7 +254,7 @@ class RequestData {
         return $file;
     }
 
-    public function getFiles(string $key = null, bool $mandatory = true) {
+    public function getFiles(string $key = null, bool $mandatory = true, array $allowedFormats = []) {
         if ($key === null) {
             return $this->data;
         }
@@ -267,7 +274,15 @@ class RequestData {
                 foreach ($file as $f) {
                     if (!(isset($f['error']) && $f['error'] === UPLOAD_ERR_NO_FILE) && !empty($f['name'])) {
                         $allEmpty = false;
-                        break;
+                        
+                        if (!empty($allowedFormats)) {
+                            $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
+                            $allowed = array_map('strtolower', $allowedFormats);
+                            if (!in_array($ext, $allowed)) {
+                                $err = new DataFailed("Invalid file format for '$key'. Allowed formats: " . implode(', ', $allowedFormats), 400);
+                                $err->response();
+                            }
+                        }
                     }
                 }
                 if ($allEmpty) {
