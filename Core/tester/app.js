@@ -677,6 +677,22 @@ function getStorageKey() {
     return `apipro_input_${currentRoute.method}_${currentRoute.path}`;
 }
 
+let isJsonWrapped = false;
+function toggleWrapJson() {
+    isJsonWrapped = !isJsonWrapped;
+    const btn = document.getElementById('wrapToggleBtn');
+    const body = document.getElementById('responseBody');
+    if (!btn || !body) return;
+    
+    if (isJsonWrapped) {
+        btn.innerText = 'Unwrap';
+        body.classList.add('wrapped');
+    } else {
+        btn.innerText = 'Wrap';
+        body.classList.remove('wrapped');
+    }
+}
+
 let activeResponseTab = 'body';
 function switchResponseTab(tab) {
     activeResponseTab = tab;
