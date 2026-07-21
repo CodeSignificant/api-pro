@@ -27,6 +27,7 @@ body {
 /* Sidebar */
 .sidebar {
     width: 320px;
+    flex-shrink: 0;
     background-color: var(--panel-bg);
     border-right: 1px solid var(--border-color);
     display: flex;
@@ -413,11 +414,15 @@ body {
 .response-body {
     flex-grow: 1;
     padding: 20px 30px;
-    overflow-y: auto;
+    overflow: auto;
     margin: 0;
     font-family: 'Fira Code', monospace;
     font-size: 0.85rem;
     color: #a6accd;
+    white-space: pre;
+}
+
+.response-body.wrapped {
     white-space: pre-wrap;
     word-break: break-all;
 }
@@ -519,7 +524,7 @@ body {
     border-color: var(--accent);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     body {
         position: relative;
         overflow-y: auto !important;

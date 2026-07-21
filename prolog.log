@@ -111,3 +111,30 @@ Stack trace:
 [20-Jul-2026 18:31:53 UTC] [2026-07-20 18:31:53] [INFO] Response: POST /v1/home/upload-image-demo - Status: 200
 [20-Jul-2026 18:36:06 UTC] [2026-07-20 18:36:06] [INFO] Request: POST /v1/home/upload-image-demo
 [20-Jul-2026 18:36:06 UTC] [2026-07-20 18:36:06] [INFO] Response: POST /v1/home/upload-image-demo - Status: 200
+[21-Jul-2026 18:40:21 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[21-Jul-2026 18:40:21 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 257
+[21-Jul-2026 18:40:50 UTC] [2026-07-21 18:40:50] [INFO] Request: GET /v1/home/search
+[21-Jul-2026 18:40:50 UTC] [2026-07-21 18:40:50] [INFO] Response: GET /v1/home/search - Status: 200
+[21-Jul-2026 18:41:07 UTC] [2026-07-21 18:41:07] [INFO] Request: POST /v1/home/request-demo | Body: {"name":"test","age":"23"}
+[21-Jul-2026 18:41:07 UTC] [2026-07-21 18:41:07] [INFO] Response: POST /v1/home/request-demo - Status: 200
+[21-Jul-2026 18:41:16 UTC] [2026-07-21 18:41:16] [INFO] Request: POST /v1/home/book-room | Body: {"roomId":"12","remarks":"12"}
+[21-Jul-2026 18:41:18 UTC] [2026-07-21 18:41:18] [INFO] Response: POST /v1/home/book-room - Status: 200
+[21-Jul-2026 18:41:18 UTC] [2026-07-21 18:41:18] [INFO] Request: POST /v1/home/book-room | Body: {"roomId":"12","remarks":"12"}
+[21-Jul-2026 18:41:20 UTC] [2026-07-21 18:41:20] [INFO] Response: POST /v1/home/book-room - Status: 200
+[21-Jul-2026 18:41:22 UTC] [2026-07-21 18:41:22] [INFO] Request: POST /v1/home/book-room | Body: {"roomId":"12","remarks":"12"}
+[21-Jul-2026 18:41:24 UTC] [2026-07-21 18:41:24] [INFO] Response: POST /v1/home/book-room - Status: 200
+[21-Jul-2026 18:41:49 UTC] [2026-07-21 18:41:49] [INFO] Request: GET /.well-known/appspecific/com.chrome.devtools.json
+[21-Jul-2026 18:41:49 UTC] [2026-07-21 18:41:49] [ERROR] Response: GET /.well-known/appspecific/com.chrome.devtools.json - Status: 404
+[21-Jul-2026 18:42:06 UTC] [2026-07-21 18:42:06] [INFO] Request: POST /v1/auth/login | Body: {"email":"codesignificant@gmail.com","password":"234"}
+[21-Jul-2026 18:42:06 UTC] [2026-07-21 18:42:06] [ERROR] Response: POST /v1/auth/login - Status: 401
+[21-Jul-2026 18:42:14 UTC] [2026-07-21 18:42:14] [INFO] Request: POST /v1/auth/devices/revoke | Body: {"deviceId":"23"}
+[21-Jul-2026 18:42:56 UTC] [2026-07-21 18:42:56] [INFO] Request: GET /.well-known/appspecific/com.chrome.devtools.json
+[21-Jul-2026 18:42:56 UTC] [2026-07-21 18:42:56] [ERROR] Response: GET /.well-known/appspecific/com.chrome.devtools.json - Status: 404
+[21-Jul-2026 18:44:31 UTC] [2026-07-21 18:44:31] [INFO] Request: GET /.well-known/appspecific/com.chrome.devtools.json
+[21-Jul-2026 18:44:31 UTC] [2026-07-21 18:44:31] [ERROR] Response: GET /.well-known/appspecific/com.chrome.devtools.json - Status: 404
+[21-Jul-2026 18:45:11 UTC] [2026-07-21 18:45:11] [INFO] Request: GET /.well-known/appspecific/com.chrome.devtools.json
+[21-Jul-2026 18:45:11 UTC] [2026-07-21 18:45:11] [ERROR] Response: GET /.well-known/appspecific/com.chrome.devtools.json - Status: 404
+[21-Jul-2026 18:45:20 UTC] [2026-07-21 18:45:20] [INFO] Request: POST /v1/auth/login | Body: {"email":"codesignificant@gmail.com","password":"234"}
+[21-Jul-2026 18:45:20 UTC] [2026-07-21 18:45:20] [ERROR] Response: POST /v1/auth/login - Status: 401
+[21-Jul-2026 18:45:44 UTC] [2026-07-21 18:45:44] [INFO] Request: GET /v1/home/encryption/default
+[21-Jul-2026 18:45:44 UTC] [2026-07-21 18:45:44] [INFO] Response: GET /v1/home/encryption/default - Status: 200

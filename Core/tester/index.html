@@ -93,7 +93,15 @@
     <!-- Main Workspace -->
     <div class="workspace">
         <!-- Empty State -->
-        <div class="workspace-empty" id="emptyState">
+        <div class="workspace-empty" id="emptyState" style="position: relative;">
+            <button class="mobile-hamburger" onclick="toggleMobileSidebar()" style="position: absolute; top: 15px; left: 15px; z-index: 10;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
             <div style="text-align: center;">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"
                     stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 15px; opacity: 0.5;">
@@ -216,9 +224,11 @@
                         </div>
                     </div>
                     <!-- Response Tabs -->
-                    <div id="responseTabs" style="display: none; border-bottom: 1px solid var(--border-color); margin-bottom: 12px; gap: 16px;">
-                        <button type="button" id="tabBtnBody" onclick="switchResponseTab('body')" style="background: none; border: none; border-bottom: 2px solid var(--accent-color); color: var(--text-color); padding: 8px 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">Response Body</button>
-                        <button type="button" id="tabBtnHeaders" onclick="switchResponseTab('headers')" style="background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); padding: 8px 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">Response Headers</button>
+                    <div id="responseTabs" style="display: none; border-bottom: 1px solid var(--border-color); margin-bottom: 12px; gap: 16px; align-items: center;">
+                        <button type="button" id="tabBtnBody" onclick="switchResponseTab('body')" style="background: none; border: none; border-bottom: 2px solid var(--accent-color); color: var(--text-color); padding: 8px 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">Body</button>
+                        <button type="button" id="tabBtnHeaders" onclick="switchResponseTab('headers')" style="background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); padding: 8px 4px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">Headers</button>
+                        <div style="flex-grow: 1;"></div>
+                        <button type="button" id="wrapToggleBtn" onclick="toggleWrapJson()" style="background: none; border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-muted); padding: 4px 8px; font-size: 0.75rem; cursor: pointer; font-weight: 600; transition: all 0.2s ease;">Wrap</button>
                     </div>
                     <pre class="response-body" id="responseBody">Awaiting request...</pre>
                     <pre class="response-body" id="responseHeaders" style="display: none; white-space: pre-wrap; font-family: 'Fira Code', monospace;"></pre>
