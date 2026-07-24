@@ -138,3 +138,12 @@ Stack trace:
 [21-Jul-2026 18:45:20 UTC] [2026-07-21 18:45:20] [ERROR] Response: POST /v1/auth/login - Status: 401
 [21-Jul-2026 18:45:44 UTC] [2026-07-21 18:45:44] [INFO] Request: GET /v1/home/encryption/default
 [21-Jul-2026 18:45:44 UTC] [2026-07-21 18:45:44] [INFO] Response: GET /v1/home/encryption/default - Status: 200
+[24-Jul-2026 18:55:08 UTC] PHP Warning:  Undefined array key "REQUEST_METHOD" in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Node.php on line 28
+[24-Jul-2026 18:55:08 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[24-Jul-2026 18:55:08 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 257
+[24-Jul-2026 18:55:24 UTC] PHP Warning:  Undefined array key "REQUEST_METHOD" in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Node.php on line 28
+[24-Jul-2026 18:55:24 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[24-Jul-2026 18:55:24 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 257
+[24-Jul-2026 18:57:53 UTC] PHP Warning:  Undefined array key "REQUEST_METHOD" in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Node.php on line 28
+[24-Jul-2026 18:57:53 UTC] PHP Deprecated:  Request::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 100
+[24-Jul-2026 18:57:53 UTC] PHP Deprecated:  RequestData::getFiles(): Implicitly marking parameter $key as nullable is deprecated, the explicit nullable type must be used instead in /home/subrahmanyam-vaskuri/Projects/FrameWorks/ApiPro/api-pro/Core/Http/Request.php on line 257

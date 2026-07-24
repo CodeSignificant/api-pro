@@ -88,12 +88,17 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
-            return new DataFailed("Database connection is not available.");
+            return new DataFailed("Database connection is not available.", 500);
         }
-        $result = $con->query($query);
+
+        try {
+            $result = $con->query($query);
+        } catch (Throwable $e) {
+            return new DataFailed("Query failed: " . $e->getMessage(), 500);
+        }
 
         if (!$result) {
-            return new DataFailed("Query failed: " . $con->error);
+            return new DataFailed("Query failed: " . $con->error, 500);
         }
 
         return new DataSuccess("Query executed successfully", $result);
@@ -103,12 +108,17 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
-            return new DataFailed("Database connection is not available.");
+            return new DataFailed("Database connection is not available.", 500);
         }
-        $result = $con->query($query);
+
+        try {
+            $result = $con->query($query);
+        } catch (Throwable $e) {
+            return new DataFailed("Query failed: " . $e->getMessage(), 500);
+        }
 
         if (!$result) {
-            return new DataFailed("Query failed: " . $con->error);
+            return new DataFailed("Query failed: " . $con->error, 500);
         }
 
         $data = [];
@@ -117,7 +127,7 @@ class ProSql
         }
 
         if (empty($data)) {
-            return new DataFailed("No records found.");
+            return new DataFailed("No records found.", 404);
         }
 
         return new DataSuccess("Fetch successful", $data);
@@ -128,12 +138,17 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
-            return new DataFailed("Database connection is not available.");
+            return new DataFailed("Database connection is not available.", 500);
         }
-        $result = $con->query($query);
+
+        try {
+            $result = $con->query($query);
+        } catch (Throwable $e) {
+            return new DataFailed("Query failed: " . $e->getMessage(), 500);
+        }
 
         if (!$result) {
-            return new DataFailed("Query failed: " . $con->error);
+            return new DataFailed("Query failed: " . $con->error, 500);
         }
 
         $data = [];
@@ -152,12 +167,17 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
-            return new DataFailed("Database connection is not available.");
+            return new DataFailed("Database connection is not available.", 500);
         }
-        $result = $con->query($query);
+
+        try {
+            $result = $con->query($query);
+        } catch (Throwable $e) {
+            return new DataFailed("Query failed: " . $e->getMessage(), 500);
+        }
 
         if (!$result) {
-            return new DataFailed("Query failed: " . $con->error);
+            return new DataFailed("Query failed: " . $con->error, 500);
         }
 
         if ($result->num_rows == 0) {
@@ -173,12 +193,17 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
-            return new DataFailed("Database connection is not available.");
+            return new DataFailed("Database connection is not available.", 500);
         }
-        $result = $con->query($query);
+
+        try {
+            $result = $con->query($query);
+        } catch (Throwable $e) {
+            return new DataFailed("Query failed: " . $e->getMessage(), 500);
+        }
 
         if (!$result) {
-            return new DataFailed("Query failed: " . $con->error);
+            return new DataFailed("Query failed: " . $con->error, 500);
         }
 
         if ($result->num_rows == 0) {
@@ -193,12 +218,17 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
-            return new DataFailed("Database connection is not available.");
+            return new DataFailed("Database connection is not available.", 500);
         }
-        $result = $con->query($query);
+
+        try {
+            $result = $con->query($query);
+        } catch (Throwable $e) {
+            return new DataFailed("Update failed: " . $e->getMessage(), 500);
+        }
 
         if (!$result) {
-            return new DataFailed("Update failed: " . $con->error);
+            return new DataFailed("Update failed: " . $con->error, 500);
         }
 
         $affected = $con->affected_rows;
@@ -213,12 +243,17 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
-            return new DataFailed("Database connection is not available.");
+            return new DataFailed("Database connection is not available.", 500);
         }
-        $result = $con->query($query);
+
+        try {
+            $result = $con->query($query);
+        } catch (Throwable $e) {
+            return new DataFailed("Update failed: " . $e->getMessage(), 500);
+        }
 
         if (!$result) {
-            return new DataFailed("Update failed: " . $con->error);
+            return new DataFailed("Update failed: " . $con->error, 500);
         }
 
         $affected = $con->affected_rows;
@@ -235,7 +270,7 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
-            return new DataFailed("Database connection is not available.");
+            return new DataFailed("Database connection is not available.", 500);
         }
         $page = max(1, (int)$page);
         $pageSize = max(1, (int)$pageSize);
@@ -275,10 +310,14 @@ class ProSql
         }
 
         $query = "SELECT $params FROM $table WHERE $condition $orderSql LIMIT $offset, $pageSize";
-        $result = $con->query($query);
+        try {
+            $result = $con->query($query);
+        } catch (Throwable $e) {
+            return new DataFailed("Query failed: " . $e->getMessage(), 500);
+        }
 
         if (!$result) {
-            return new DataFailed("Query failed: " . $con->error);
+            return new DataFailed("Query failed: " . $con->error, 500);
         }
 
         $data = [];
@@ -288,10 +327,14 @@ class ProSql
 
         // Count query
         $countQuery = "SELECT COUNT(*) as total_count FROM $table WHERE $condition";
-        $countResult = $con->query($countQuery);
+        try {
+            $countResult = $con->query($countQuery);
+        } catch (Throwable $e) {
+            return new DataFailed("Count query failed: " . $e->getMessage(), 500);
+        }
 
         if (!$countResult) {
-            return new DataFailed("Count query failed: " . $con->error);
+            return new DataFailed("Count query failed: " . $con->error, 500);
         }
 
         $totalCountRow = $countResult->fetch_assoc();
@@ -313,7 +356,7 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
-            return new DataFailed("Database connection is not available.");
+            return new DataFailed("Database connection is not available.", 500);
         }
         $page = max(1, (int)$page);
         $pageSize = max(1, (int)$pageSize);
@@ -349,10 +392,14 @@ class ProSql
 
         $query = "SELECT $params FROM $table WHERE $condition $orderSql LIMIT $offset, $pageSize";
         echo($query);
-        $result = $con->query($query);
+        try {
+            $result = $con->query($query);
+        } catch (Throwable $e) {
+            return new DataFailed("Query failed: " . $e->getMessage(), 500);
+        }
 
         if (!$result) {
-            return new DataFailed("Query failed: " . $con->error);
+            return new DataFailed("Query failed: " . $con->error, 500);
         }
 
         $data = [];
@@ -362,10 +409,14 @@ class ProSql
 
         // Count query
         $countQuery = "SELECT COUNT(*) as total_count FROM $table WHERE $condition";
-        $countResult = $con->query($countQuery);
+        try {
+            $countResult = $con->query($countQuery);
+        } catch (Throwable $e) {
+            return new DataFailed("Count query failed: " . $e->getMessage(), 500);
+        }
 
         if (!$countResult) {
-            return new DataFailed("Count query failed: " . $con->error);
+            return new DataFailed("Count query failed: " . $con->error, 500);
         }
 
         $totalCountRow = $countResult->fetch_assoc();
