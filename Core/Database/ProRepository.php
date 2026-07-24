@@ -28,6 +28,8 @@ class ProRepository
             // Force lock all tables if locked at global or repository level
             $forceLockAll = ($repoLocked || $globalLocked);
 
+            $createQueue = [];
+
             foreach ($tables as $tableName => $config) {
                 // Determine clean target table name
                 $tableNameSafe = ProSql::Escape(is_numeric($tableName) ? (is_array($config) ? ($config['table'] ?? '') : $config) : $tableName);
@@ -68,9 +70,13 @@ class ProRepository
                 $exists = ($existsRes->isSuccess() && !empty($existsRes->getData()));
 
                 if (!$exists) {
-                    // Create table if it doesn't exist (locked or not, we must create it first to avoid app crashes)
+                    // Create table if missing - add to queue to handle table/scheme dependencies
                     if (!empty($schemaSql)) {
-                        ProSql::Query($schemaSql);
+                        $createQueue[] = [
+                            'table' => $tableNameSafe,
+                            'schema' => $schemaSql,
+                            'update' => $updateQueries
+                        ];
                     }
                 } else {
                     // Table exists! Bypass drop/alter changes if locked at global, repository, or table level
@@ -79,22 +85,86 @@ class ProRepository
                     }
 
                     if ($mode === 'force' || $mode === 'recreate') {
-                        // Force drops and recreates
+                        // Force drops and recreates - add to creation queue
                         $dropQuery = "DROP TABLE IF EXISTS `$tableNameSafe`";
                         ProSql::Query($dropQuery);
                         if (!empty($schemaSql)) {
-                            ProSql::Query($schemaSql);
+                            $createQueue[] = [
+                                'table' => $tableNameSafe,
+                                'schema' => $schemaSql,
+                                'update' => $updateQueries
+                            ];
                         }
                     } elseif ($mode === 'update' || $mode === 'alter') {
-                        // Run incremental alter queries
+                        // Queue alter/update queries on every fail/sync so all operations use queue retries
                         if (!empty($updateQueries) && is_array($updateQueries)) {
-                            foreach ($updateQueries as $alterQuery) {
-                                if (!empty($alterQuery)) {
-                                    ProSql::Query($alterQuery);
+                            $createQueue[] = [
+                                'table' => $tableNameSafe,
+                                'schema' => null,
+                                'update' => $updateQueries
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // Process schema queue iteratively: retry up to 3 times, return 500 if still failing after 3 attempts
+            if (!empty($createQueue)) {
+                $maxPasses = 3;
+                $pass = 0;
+                $lastErrorMessage = "Schema migration failed";
+
+                while (!empty($createQueue) && $pass < $maxPasses) {
+                    $pass++;
+                    $progressMade = false;
+                    $remainingQueue = [];
+
+                    foreach ($createQueue as $item) {
+                        $allSuccess = true;
+
+                        // 1. Run schema creation if defined
+                        if (!empty($item['schema'])) {
+                            $schemas = is_array($item['schema']) ? $item['schema'] : [$item['schema']];
+                            foreach ($schemas as $sql) {
+                                if (empty(trim($sql))) continue;
+                                $res = ProSql::Query($sql);
+                                if (!$res->isSuccess()) {
+                                    $allSuccess = false;
+                                    $lastErrorMessage = $res->getMessage();
+                                    break;
                                 }
                             }
                         }
+
+                        // 2. Run alter/update queries if schema succeeded (or if only update queries queued)
+                        if ($allSuccess && !empty($item['update']) && is_array($item['update'])) {
+                            foreach ($item['update'] as $alterQuery) {
+                                if (empty(trim($alterQuery))) continue;
+                                $res = ProSql::Query($alterQuery);
+                                if (!$res->isSuccess()) {
+                                    $allSuccess = false;
+                                    $lastErrorMessage = $res->getMessage();
+                                    break;
+                                }
+                            }
+                        }
+
+                        if ($allSuccess) {
+                            $progressMade = true;
+                        } else {
+                            // Dependent scheme/table issue, re-queue for next pass
+                            $remainingQueue[] = $item;
+                        }
                     }
+
+                    $createQueue = $remainingQueue;
+                }
+
+                // If schema execution still fails after 3 attempts, return HTTP 500 error envelope
+                if (!empty($createQueue)) {
+                    $failedTable = $createQueue[0]['table'] ?? 'unknown';
+                    $failedMsg = "Schema migration failed for table '$failedTable' after 3 attempts: " . $lastErrorMessage;
+                    (new DataFailed($failedMsg, 500))->response();
                 }
             }
         }

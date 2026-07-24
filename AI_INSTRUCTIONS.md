@@ -244,6 +244,9 @@ class ProductService {
 
 All repositories **MUST** inherit from the base `Repository` parent class. This class automatically manages database schema checks, creations, incremental alterations, and structural locks controlled globally by the `DB_WRITE` setting inside `config.php`.
 
+### Queue-Based Schema Creation & Dependency Resolution:
+All table creation and alter/update tasks are placed into a schema processing queue and evaluated iteratively up to 3 times. If a table schema depends on another schema (e.g. foreign keys or dependent table structures), execution retries across 3 queue passes. If any schema operations still fail after 3 attempts, the repository returns a `DataFailed` envelope with HTTP status code `500` detailing the failed table migration.
+
 ### Available Sync Settings in `config.php`:
 - `define('DB_WRITE', 'update');` (Default / Development): Automatically creates missing tables and runs incremental structure alterations on existing tables.
 - `define('DB_WRITE', 'create');`: Creates tables only if they are missing.

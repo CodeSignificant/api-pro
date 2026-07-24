@@ -211,11 +211,17 @@ ApiPro provides full session control with customizable maximum device limits:
 
 ApiPro introduces a base `Repository` (backed by `ProRepository`) class that automatically synchronizes database table schemas declared inside child constructors, managed globally or protected by a robust 3-tier lock system.
 
+### Queue-Based Schema Creation & Dependency Resolution
+All table creation and alter/update tasks are collected into a schema creation queue and processed iteratively over up to 3 passes. If a table schema requires another table schema (e.g., foreign key references or dependent table structures), the queue re-attempts execution in subsequent passes. If any schema operation continues to fail after 3 attempts, the framework immediately halts and responds with an HTTP `500` `DataFailed` response detailing the migration error.
+
 ### Key Operational Sync Modes (`config.php`):
 - `define('DB_WRITE', 'update');` (Default / Development): Automatically creates missing tables and runs incremental structure alterations on existing tables.
 - `define('DB_WRITE', 'create');`: Creates tables only if they are missing.
 - `define('DB_WRITE', 'force');` (or `'recreate'`): Automatically drops existing tables and recreates them fresh.
 - `define('DB_WRITE', false);`: Completely suspends all constructor checks and database sync activity (highly recommended for production performance).
+
+### Database Query Error Handling (`ProSql`)
+Database connection failures and query execution errors in `ProSql` return a `DataFailed` response envelope with an explicit HTTP `500` status code (e.g. `new DataFailed("Query failed: ...", 500)`).
 
 ### The 3-Tier Lock Hierarchy:
 1. **Global Lock (Project Scope)**: Set `define('DB_WRITE', 'lock');` in `config.php` to prevent drops or alterations on any table in the entire codebase.
