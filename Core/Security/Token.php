@@ -129,6 +129,10 @@ class Token
             $err->response();
         }
 
+        // Update token generation time to current time for rotation tracking
+        $nowFormatted = date('Y-m-d H:i:s', $now);
+        $decodedToken['tg'] = $nowFormatted;
+
         // Extend expiry
         $decodedToken['te'] = date('Y-m-d H:i:s', $now + $session);
 
@@ -264,9 +268,25 @@ class Token
             if ($driver !== 'stateless') {
                 // If this session is not in state repository, it has been revoked
                 $sessions = self::getManager()->getRepository()->getByUser($decoded['id']);
-                $activeDeviceIds = array_column($sessions, 'device_id');
-                if (!in_array($decoded['did'], $activeDeviceIds)) {
+                $matchingSession = null;
+                foreach ($sessions as $sess) {
+                    if (isset($sess['device_id']) && $sess['device_id'] === $decoded['did']) {
+                        $matchingSession = $sess;
+                        break;
+                    }
+                }
+
+                if (!$matchingSession) {
                     return 0; // Revoked token!
+                }
+
+                // Token rotation check: If session last_active is newer than token tg, old token was rotated out
+                if (isset($matchingSession['last_active']) && isset($decoded['tg'])) {
+                    $tokenTg = strtotime($decoded['tg']);
+                    $sessionActive = strtotime($matchingSession['last_active']);
+                    if ($tokenTg < $sessionActive) {
+                        return 0; // Old token invalidated by token refresh!
+                    }
                 }
             }
 
@@ -281,8 +301,6 @@ class Token
                     return 0; // Device ID mismatch (anti-hijack)
                 }
             }
-            // If NO explicit device headers are provided and we are in stateful mode, 
-            // the state repository check above is sufficient to authorize testing clients (e.g. curl/Postman).
         }
 
         return $decoded;
