@@ -19,6 +19,7 @@ class TokenRepository extends Repository
                     user_agent VARCHAR(512) NULL,
                     last_active DATETIME NOT NULL,
                     expires_at DATETIME NOT NULL,
+                    token TEXT NULL,
                     PRIMARY KEY (user_id, device_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
             ]
@@ -34,7 +35,8 @@ class TokenRepository extends Repository
         ?string $deviceName,
         ?string $ipAddress,
         ?string $userAgent,
-        int $expiresAtTimestamp
+        int $expiresAtTimestamp,
+        ?string $token = null
     ): void {
         if ($this->driver === 'stateless') {
             return;
@@ -54,7 +56,8 @@ class TokenRepository extends Repository
                 'ip_address' => $ipAddress,
                 'user_agent' => $userAgent,
                 'last_active' => $lastActive,
-                'expires_at' => $expiresAt
+                'expires_at' => $expiresAt,
+                'token' => $token
             ];
             $ttl = max(1, $expiresAtTimestamp - time());
             ProRedis::set($key, json_encode($payload), $ttl);
@@ -69,11 +72,12 @@ class TokenRepository extends Repository
             $escUserAgent = ProSql::Escape($userAgent);
             $escLastActive = ProSql::Escape($lastActive);
             $escExpiresAt = ProSql::Escape($expiresAt);
+            $escToken = ProSql::Escape($token ?? '');
 
             $query = "REPLACE INTO active_sessions 
-                (user_id, device_id, device_name, ip_address, user_agent, last_active, expires_at)
+                (user_id, device_id, device_name, ip_address, user_agent, last_active, expires_at, token)
                 VALUES 
-                ($escUserId, '$escDeviceId', '$escDeviceName', '$escIpAddress', '$escUserAgent', '$escLastActive', '$escExpiresAt')";
+                ($escUserId, '$escDeviceId', '$escDeviceName', '$escIpAddress', '$escUserAgent', '$escLastActive', '$escExpiresAt', '$escToken')";
             ProSql::Update($query);
         }
     }
@@ -129,7 +133,7 @@ class TokenRepository extends Repository
             }
         } elseif ($this->driver === 'database') {
             $escUserId = (int)$userId;
-            $query = "SELECT device_id, device_name, ip_address, user_agent, last_active, expires_at 
+            $query = "SELECT device_id, device_name, ip_address, user_agent, last_active, expires_at, token 
                       FROM active_sessions 
                       WHERE user_id = $escUserId AND expires_at > NOW()";
             $res = ProSql::FetchList($query);

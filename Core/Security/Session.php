@@ -11,14 +11,7 @@ class Session
             return null;
         }
 
-        if (
-            isset($_SERVER['HTTP_AUTHORIZATION']) &&
-            preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)
-        ) {
-            return trim($matches[1]);
-        }
-
-        return null;
+        return Token::getBearerToken();
     }
 
     // ======================================================================
@@ -46,11 +39,9 @@ class Session
     {
         self::Get(); // enforce validity
         
-        if (
-            isset($_SERVER['HTTP_AUTHORIZATION']) &&
-            preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)
-        ) {
-            return trim($matches[1]);
+        $token = Token::getBearerToken();
+        if ($token !== null) {
+            return $token;
         }
 
         $err = new DataFailed("Unauthorized: Bearer token is missing.", 401);
@@ -95,6 +86,19 @@ class Session
     public static function Generate($userId, array $payload = [], ?string $role = null): string
     {
         return Token::Generate($userId, $payload, $role);
+    }
+
+    public static function CanRefresh()
+    {
+        return Token::CanRefresh();
+    }
+
+    public static function Refresh($decodedToken = null, int $session = 1800)
+    {
+        if ($decodedToken === null) {
+            $decodedToken = Token::CanRefresh();
+        }
+        return Token::Refresh($decodedToken, $session);
     }
 
     public static function RevokeDevice($userId, string $deviceId): void
