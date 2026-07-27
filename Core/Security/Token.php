@@ -46,13 +46,15 @@ class Token
         $data['v']   = defined('VERSION') ? VERSION : '1.0.0';
         $data['did'] = $deviceId;
 
+        $tokenString = self::_encrypt(json_encode($data));
+
         // Enforce concurrency rules and device limits before saving
         self::getManager()->enforceDeviceLimits($id, $deviceId);
 
         // Persist session state in repository driver (Redis or DB)
-        self::getManager()->getRepository()->save($id, $deviceId, $deviceName, $ipAddress, $userAgent, $expiresAt);
+        self::getManager()->getRepository()->save($id, $deviceId, $deviceName, $ipAddress, $userAgent, $expiresAt, $tokenString);
 
-        return self::_encrypt(json_encode($data));
+        return $tokenString;
     }
 
     // ======================================================================
@@ -136,6 +138,8 @@ class Token
         // Extend expiry
         $decodedToken['te'] = date('Y-m-d H:i:s', $now + $session);
 
+        $newTokenString = self::_encrypt(json_encode($decodedToken));
+
         // Update state in repository
         $harvested = self::getManager()->harvestDeviceDetails();
         self::getManager()->getRepository()->save(
@@ -144,10 +148,11 @@ class Token
             $harvested['device_name'],
             $harvested['ip_address'],
             $harvested['user_agent'],
-            $now + $session
+            $now + $session,
+            $newTokenString
         );
 
-        return self::_encrypt(json_encode($decodedToken));
+        return $newTokenString;
     }
 
     // ======================================================================
@@ -179,20 +184,60 @@ class Token
             $err->response();
         }
 
+        // Session Revocation Check & Active Token Verification
+        $driver = self::getManager()->getDriver();
+        if ($driver !== 'stateless') {
+            $sessions = self::getManager()->getRepository()->getByUser($decoded['id']);
+            $matchingSession = null;
+            foreach ($sessions as $sess) {
+                if (isset($sess['device_id']) && $sess['device_id'] === $decoded['did']) {
+                    $matchingSession = $sess;
+                    break;
+                }
+            }
+
+            if (!$matchingSession) {
+                return 0; // Revoked session
+            }
+
+            if (isset($matchingSession['token']) && !empty($matchingSession['token'])) {
+                if ($matchingSession['token'] !== $rawToken) {
+                    return 0; // Old token already rotated
+                }
+            }
+        }
+
         return $decoded;
+    }
+
+    public static function getBearerToken(): ?string
+    {
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION']
+            ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
+            ?? $_SERVER['HTTP_AUTHORIZATION_LOWER']
+            ?? '';
+
+        if (empty($authHeader) && function_exists('apache_request_headers')) {
+            $headers = apache_request_headers();
+            $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+        }
+
+        if (!empty($authHeader) && preg_match('/Bearer\s(\S+)/i', $authHeader, $matches)) {
+            return trim($matches[1]);
+        }
+
+        return null;
     }
 
     public static function RawToken()
     {
-        if (
-            !isset($_SERVER['HTTP_AUTHORIZATION']) ||
-            !preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)
-        ) {
+        $token = self::getBearerToken();
+        if (!$token) {
             $err = new DataFailed("Unauthorized: Bearer token is missing.", 401);
             $err->response();
         }
 
-        return trim($matches[1]);
+        return $token;
     }
 
     // ======================================================================
@@ -213,14 +258,10 @@ class Token
     // ======================================================================
     private static function _verifyToken()
     {
-        if (
-            !isset($_SERVER['HTTP_AUTHORIZATION']) ||
-            !preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)
-        ) {
+        $token = self::getBearerToken();
+        if (!$token) {
             return 0;
         }
-
-        $token = trim($matches[1]);
 
         // Decode & Decrypt
         $decrypted = self::_decrypt($token);
@@ -280,12 +321,10 @@ class Token
                     return 0; // Revoked token!
                 }
 
-                // Token rotation check: If session last_active is newer than token tg, old token was rotated out
-                if (isset($matchingSession['last_active']) && isset($decoded['tg'])) {
-                    $tokenTg = strtotime($decoded['tg']);
-                    $sessionActive = strtotime($matchingSession['last_active']);
-                    if ($tokenTg < $sessionActive) {
-                        return 0; // Old token invalidated by token refresh!
+                // Token rotation check: If active session token is tracked, verify exact match with raw request token
+                if (isset($matchingSession['token']) && !empty($matchingSession['token'])) {
+                    if ($matchingSession['token'] !== $token) {
+                        return 0; // Old token invalidated by token refresh or new login!
                     }
                 }
             }
