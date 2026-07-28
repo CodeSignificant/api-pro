@@ -24,8 +24,9 @@ class AuthController
     {
         $session = Session::Get();
         $userId = $session['id'];
+        $role = $session['r'] ?? null;
         $deviceId = $session['did'] ?? null;
-        return $this->service->logout($userId, $deviceId);
+        return $this->service->logout($userId, $deviceId, $role);
     }
 
     #[Get('/devices')]
@@ -33,7 +34,8 @@ class AuthController
     {
         $session = Session::Get();
         $userId = $session['id'];
-        return $this->service->getDevices($userId);
+        $role = $session['r'] ?? null;
+        return $this->service->getDevices($userId, $role);
     }
 
     #[Post('/devices/revoke')]
@@ -41,7 +43,8 @@ class AuthController
     {
         $session = Session::Get();
         $userId = $session['id'];
+        $role = $session['r'] ?? null;
         $body = Node::body(['deviceId']);
-        return $this->service->revokeDevice($userId, $body['deviceId']);
+        return $this->service->revokeDevice($userId, $body['deviceId'], $role);
     }
 }
