@@ -101,13 +101,13 @@ class Session
         return Token::Refresh($decodedToken, $session);
     }
 
-    public static function RevokeDevice($userId, string $deviceId): void
+    public static function RevokeDevice($userId, string $deviceId, ?string $role = null): void
     {
-        Token::RevokeDevice($userId, $deviceId);
+        Token::RevokeDevice($userId, $deviceId, $role);
     }
 
-    public static function GetDevices($userId): array
+    public static function GetDevices($userId, ?string $role = null): array
     {
-        return Token::GetDevices($userId);
+        return Token::GetDevices($userId, $role);
     }
 }

@@ -33,10 +33,10 @@ class AuthService
     /**
      * Log out active device session
      */
-    public function logout($userId, ?string $deviceId): DataResponse
+    public function logout($userId, ?string $deviceId, ?string $role = null): DataResponse
     {
         if ($deviceId) {
-            Session::RevokeDevice($userId, $deviceId);
+            Session::RevokeDevice($userId, $deviceId, $role);
         }
 
         return new DataSuccess('Logged out successfully');
@@ -45,18 +45,18 @@ class AuthService
     /**
      * List all active logged-in devices
      */
-    public function getDevices($userId): DataResponse
+    public function getDevices($userId, ?string $role = null): DataResponse
     {
-        $devices = Session::GetDevices($userId);
+        $devices = Session::GetDevices($userId, $role);
         return new DataSuccess('Active devices fetched successfully', $devices);
     }
 
     /**
      * Revoke access for a specific device ID
      */
-    public function revokeDevice($userId, string $deviceId): DataResponse
+    public function revokeDevice($userId, string $deviceId, ?string $role = null): DataResponse
     {
-        Session::RevokeDevice($userId, $deviceId);
+        Session::RevokeDevice($userId, $deviceId, $role);
         return new DataSuccess('Device revoked successfully');
     }
 }

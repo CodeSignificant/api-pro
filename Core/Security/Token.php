@@ -49,10 +49,10 @@ class Token
         $tokenString = self::_encrypt(json_encode($data));
 
         // Enforce concurrency rules and device limits before saving
-        self::getManager()->enforceDeviceLimits($id, $deviceId);
+        self::getManager()->enforceDeviceLimits($id, $role, $deviceId);
 
         // Persist session state in repository driver (Redis or DB)
-        self::getManager()->getRepository()->save($id, $deviceId, $deviceName, $ipAddress, $userAgent, $expiresAt, $tokenString);
+        self::getManager()->getRepository()->save($id, $role, $deviceId, $deviceName, $ipAddress, $userAgent, $expiresAt, $tokenString);
 
         return $tokenString;
     }
@@ -141,9 +141,11 @@ class Token
         $newTokenString = self::_encrypt(json_encode($decodedToken));
 
         // Update state in repository
+        $role = $decodedToken['r'] ?? 'user';
         $harvested = self::getManager()->harvestDeviceDetails();
         self::getManager()->getRepository()->save(
             $decodedToken['id'],
+            $role,
             $decodedToken['did'],
             $harvested['device_name'],
             $harvested['ip_address'],
@@ -187,7 +189,8 @@ class Token
         // Session Revocation Check & Active Token Verification
         $driver = self::getManager()->getDriver();
         if ($driver !== 'stateless') {
-            $sessions = self::getManager()->getRepository()->getByUser($decoded['id']);
+            $role = $decoded['r'] ?? null;
+            $sessions = self::getManager()->getRepository()->getByUser($decoded['id'], $role);
             $matchingSession = null;
             foreach ($sessions as $sess) {
                 if (isset($sess['device_id']) && $sess['device_id'] === $decoded['did']) {
@@ -243,14 +246,14 @@ class Token
     // ======================================================================
     // Revocation Interface Methods
     // ======================================================================
-    public static function RevokeDevice($userId, string $deviceId): void
+    public static function RevokeDevice($userId, string $deviceId, ?string $role = null): void
     {
-        self::getManager()->getRepository()->delete($userId, $deviceId);
+        self::getManager()->getRepository()->delete($userId, $deviceId, $role);
     }
 
-    public static function GetDevices($userId): array
+    public static function GetDevices($userId, ?string $role = null): array
     {
-        return self::getManager()->getRepository()->getByUser($userId);
+        return self::getManager()->getRepository()->getByUser($userId, $role);
     }
 
     // ======================================================================
@@ -307,8 +310,9 @@ class Token
             $driver = self::getManager()->getDriver();
 
             if ($driver !== 'stateless') {
+                $role = $decoded['r'] ?? null;
                 // If this session is not in state repository, it has been revoked
-                $sessions = self::getManager()->getRepository()->getByUser($decoded['id']);
+                $sessions = self::getManager()->getRepository()->getByUser($decoded['id'], $role);
                 $matchingSession = null;
                 foreach ($sessions as $sess) {
                     if (isset($sess['device_id']) && $sess['device_id'] === $decoded['did']) {

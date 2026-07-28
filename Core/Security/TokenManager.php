@@ -66,9 +66,9 @@ class TokenManager
     }
 
     /**
-     * Enforce maximum device session limit rules
+     * Enforce maximum device session limit rules per user role
      */
-    public function enforceDeviceLimits($userId, string $newDeviceId): void
+    public function enforceDeviceLimits($userId, string $role, string $newDeviceId): void
     {
         if ($this->driver === 'stateless') {
             return;
@@ -77,13 +77,13 @@ class TokenManager
         $allowMultiple = $this->isMultipleDeviceLoginAllowed();
 
         if (!$allowMultiple) {
-            // Kick out all other devices completely
-            $this->repo->deleteAllByUser($userId);
+            // Kick out all other devices completely for this specific user role
+            $this->repo->deleteAllByUser($userId, $role);
             return;
         }
 
-        // Fetch current active sessions
-        $sessions = $this->repo->getByUser($userId);
+        // Fetch current active sessions for this specific role
+        $sessions = $this->repo->getByUser($userId, $role);
         $max = $this->getMaxDevices();
 
         // Count does not include current device if it's already active (refreshing/re-authenticating)
@@ -100,7 +100,7 @@ class TokenManager
                 $toDeleteCount = count($sessions) - $max + 1;
                 for ($i = 0; $i < $toDeleteCount; $i++) {
                     if (isset($sessions[$i]['device_id'])) {
-                        $this->repo->delete($userId, $sessions[$i]['device_id']);
+                        $this->repo->delete($userId, $sessions[$i]['device_id'], $role);
                     }
                 }
             }
