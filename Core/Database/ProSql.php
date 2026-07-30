@@ -4,10 +4,20 @@ class ProSql
 {
     private static ?mysqli $con = null;
 
+    private static function logError(string $message): void
+    {
+        if (class_exists('Log')) {
+            Log::error($message);
+        } else {
+            error_log("[ERROR] $message");
+        }
+    }
+
     /** Establish and return database connection */
     private static function connect(): ?mysqli
     {
         if (!class_exists('mysqli')) {
+            self::logError("ProSql::connect failed: mysqli extension is not installed.");
             return null;
         }
 
@@ -20,12 +30,14 @@ class ProSql
                 self::$con = @new mysqli('p:' . DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
         
                 if (self::$con->connect_error) {
+                    self::logError("ProSql::connect error: " . self::$con->connect_error);
                     self::$con = null;
                     return null;
                 }
         
                 self::$con->set_charset("utf8mb4");
             } catch (Throwable $e) {
+                self::logError("ProSql::connect exception: " . $e->getMessage());
                 self::$con = null;
                 return null;
             } finally {
@@ -88,16 +100,19 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
+            self::logError("ProSql::Query failed: Database connection is not available | Query: $query");
             return new DataFailed("Database connection is not available.", 500);
         }
 
         try {
             $result = $con->query($query);
         } catch (Throwable $e) {
+            self::logError("ProSql::Query exception: " . $e->getMessage() . " | Query: $query");
             return new DataFailed("Query failed: " . $e->getMessage(), 500);
         }
 
         if (!$result) {
+            self::logError("ProSql::Query error: " . $con->error . " | Query: $query");
             return new DataFailed("Query failed: " . $con->error, 500);
         }
 
@@ -108,16 +123,19 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
+            self::logError("ProSql::FetchListed failed: Database connection is not available | Query: $query");
             return new DataFailed("Database connection is not available.", 500);
         }
 
         try {
             $result = $con->query($query);
         } catch (Throwable $e) {
+            self::logError("ProSql::FetchListed exception: " . $e->getMessage() . " | Query: $query");
             return new DataFailed("Query failed: " . $e->getMessage(), 500);
         }
 
         if (!$result) {
+            self::logError("ProSql::FetchListed error: " . $con->error . " | Query: $query");
             return new DataFailed("Query failed: " . $con->error, 500);
         }
 
@@ -138,16 +156,19 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
+            self::logError("ProSql::FetchList failed: Database connection is not available | Query: $query");
             return new DataFailed("Database connection is not available.", 500);
         }
 
         try {
             $result = $con->query($query);
         } catch (Throwable $e) {
+            self::logError("ProSql::FetchList exception: " . $e->getMessage() . " | Query: $query");
             return new DataFailed("Query failed: " . $e->getMessage(), 500);
         }
 
         if (!$result) {
+            self::logError("ProSql::FetchList error: " . $con->error . " | Query: $query");
             return new DataFailed("Query failed: " . $con->error, 500);
         }
 
@@ -167,16 +188,19 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
+            self::logError("ProSql::Fetch failed: Database connection is not available | Query: $query");
             return new DataFailed("Database connection is not available.", 500);
         }
 
         try {
             $result = $con->query($query);
         } catch (Throwable $e) {
+            self::logError("ProSql::Fetch exception: " . $e->getMessage() . " | Query: $query");
             return new DataFailed("Query failed: " . $e->getMessage(), 500);
         }
 
         if (!$result) {
+            self::logError("ProSql::Fetch error: " . $con->error . " | Query: $query");
             return new DataFailed("Query failed: " . $con->error, 500);
         }
 
@@ -193,16 +217,19 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
+            self::logError("ProSql::FetchItem failed: Database connection is not available | Query: $query");
             return new DataFailed("Database connection is not available.", 500);
         }
 
         try {
             $result = $con->query($query);
         } catch (Throwable $e) {
+            self::logError("ProSql::FetchItem exception: " . $e->getMessage() . " | Query: $query");
             return new DataFailed("Query failed: " . $e->getMessage(), 500);
         }
 
         if (!$result) {
+            self::logError("ProSql::FetchItem error: " . $con->error . " | Query: $query");
             return new DataFailed("Query failed: " . $con->error, 500);
         }
 
@@ -218,16 +245,19 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
+            self::logError("ProSql::Updated failed: Database connection is not available | Query: $query");
             return new DataFailed("Database connection is not available.", 500);
         }
 
         try {
             $result = $con->query($query);
         } catch (Throwable $e) {
+            self::logError("ProSql::Updated exception: " . $e->getMessage() . " | Query: $query");
             return new DataFailed("Update failed: " . $e->getMessage(), 500);
         }
 
         if (!$result) {
+            self::logError("ProSql::Updated error: " . $con->error . " | Query: $query");
             return new DataFailed("Update failed: " . $con->error, 500);
         }
 
@@ -243,16 +273,19 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
+            self::logError("ProSql::Update failed: Database connection is not available | Query: $query");
             return new DataFailed("Database connection is not available.", 500);
         }
 
         try {
             $result = $con->query($query);
         } catch (Throwable $e) {
+            self::logError("ProSql::Update exception: " . $e->getMessage() . " | Query: $query");
             return new DataFailed("Update failed: " . $e->getMessage(), 500);
         }
 
         if (!$result) {
+            self::logError("ProSql::Update error: " . $con->error . " | Query: $query");
             return new DataFailed("Update failed: " . $con->error, 500);
         }
 
@@ -270,6 +303,7 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
+            self::logError("ProSql::FetchPaginated failed: Database connection is not available | Table: $table");
             return new DataFailed("Database connection is not available.", 500);
         }
         $page = max(1, (int)$page);
@@ -313,10 +347,12 @@ class ProSql
         try {
             $result = $con->query($query);
         } catch (Throwable $e) {
+            self::logError("ProSql::FetchPaginated exception: " . $e->getMessage() . " | Query: $query");
             return new DataFailed("Query failed: " . $e->getMessage(), 500);
         }
 
         if (!$result) {
+            self::logError("ProSql::FetchPaginated error: " . $con->error . " | Query: $query");
             return new DataFailed("Query failed: " . $con->error, 500);
         }
 
@@ -330,10 +366,12 @@ class ProSql
         try {
             $countResult = $con->query($countQuery);
         } catch (Throwable $e) {
+            self::logError("ProSql::FetchPaginated count exception: " . $e->getMessage() . " | Query: $countQuery");
             return new DataFailed("Count query failed: " . $e->getMessage(), 500);
         }
 
         if (!$countResult) {
+            self::logError("ProSql::FetchPaginated count error: " . $con->error . " | Query: $countQuery");
             return new DataFailed("Count query failed: " . $con->error, 500);
         }
 
@@ -356,6 +394,7 @@ class ProSql
     {
         $con = self::connect();
         if (!$con) {
+            self::logError("ProSql::FetchPaginatedDebug failed: Database connection is not available | Table: $table");
             return new DataFailed("Database connection is not available.", 500);
         }
         $page = max(1, (int)$page);
@@ -395,10 +434,12 @@ class ProSql
         try {
             $result = $con->query($query);
         } catch (Throwable $e) {
+            self::logError("ProSql::FetchPaginatedDebug exception: " . $e->getMessage() . " | Query: $query");
             return new DataFailed("Query failed: " . $e->getMessage(), 500);
         }
 
         if (!$result) {
+            self::logError("ProSql::FetchPaginatedDebug error: " . $con->error . " | Query: $query");
             return new DataFailed("Query failed: " . $con->error, 500);
         }
 
@@ -412,10 +453,12 @@ class ProSql
         try {
             $countResult = $con->query($countQuery);
         } catch (Throwable $e) {
+            self::logError("ProSql::FetchPaginatedDebug count exception: " . $e->getMessage() . " | Query: $countQuery");
             return new DataFailed("Count query failed: " . $e->getMessage(), 500);
         }
 
         if (!$countResult) {
+            self::logError("ProSql::FetchPaginatedDebug count error: " . $con->error . " | Query: $countQuery");
             return new DataFailed("Count query failed: " . $con->error, 500);
         }
 

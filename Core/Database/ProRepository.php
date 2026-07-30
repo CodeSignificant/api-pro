@@ -2,6 +2,92 @@
 
 class ProRepository
 {
+    private static function getExistingColumns(string $tableName): array
+    {
+        $res = ProSql::FetchList("SHOW COLUMNS FROM `$tableName`");
+        if (!$res->isSuccess() || empty($res->getData())) {
+            return [];
+        }
+        $columns = [];
+        foreach ($res->getData() as $row) {
+            if (isset($row['Field'])) {
+                $columns[strtolower($row['Field'])] = true;
+            }
+        }
+        return $columns;
+    }
+
+    private static function getExistingIndexes(string $tableName): array
+    {
+        $res = ProSql::FetchList("SHOW INDEX FROM `$tableName`");
+        if (!$res->isSuccess() || empty($res->getData())) {
+            return [];
+        }
+        $indexes = [];
+        foreach ($res->getData() as $row) {
+            if (isset($row['Key_name'])) {
+                $indexes[strtolower($row['Key_name'])] = true;
+            }
+        }
+        return $indexes;
+    }
+
+    private static function shouldExecuteAlterQuery(string $alterQuery, array $existingColumns, array $existingIndexes): bool
+    {
+        $cleanQuery = trim($alterQuery);
+        if (empty($cleanQuery)) return false;
+
+        // 1. Handle ADD COLUMN
+        if (preg_match_all('/ADD\s+(?:COLUMN\s+)?[`"]?(\w+)[`"]?/i', $cleanQuery, $matches)) {
+            if (!empty($matches[1])) {
+                $allExist = true;
+                foreach ($matches[1] as $colName) {
+                    $colLower = strtolower($colName);
+                    // Ignore SQL keywords that might follow ADD (like INDEX, KEY, UNIQUE, PRIMARY, FOREIGN, CONSTRAINT)
+                    if (in_array($colLower, ['index', 'key', 'unique', 'primary', 'foreign', 'constraint'])) {
+                        $allExist = false;
+                        break;
+                    }
+                    if (!isset($existingColumns[$colLower])) {
+                        $allExist = false;
+                        break;
+                    }
+                }
+                if ($allExist) {
+                    return false; // All columns in this ADD statement already exist in table
+                }
+            }
+        }
+
+        // 2. Handle MODIFY / CHANGE COLUMN
+        if (preg_match('/(?:MODIFY|CHANGE)\s+(?:COLUMN\s+)?[`"]?(\w+)[`"]?/i', $cleanQuery, $matches)) {
+            $colLower = strtolower($matches[1]);
+            if (!in_array($colLower, ['index', 'key', 'primary', 'foreign', 'constraint'])) {
+                if (!isset($existingColumns[$colLower])) {
+                    return false; // Cannot modify column that does not exist
+                }
+            }
+        }
+
+        // 3. Handle ADD INDEX / KEY / UNIQUE
+        if (preg_match('/ADD\s+(?:UNIQUE\s+|FULLTEXT\s+|SPATIAL\s+)?(?:INDEX|KEY)\s+(?:IF\s+NOT\s+EXISTS\s+)?[`"]?(\w+)[`"]?/i', $cleanQuery, $matches)) {
+            $indexName = strtolower($matches[1]);
+            if (isset($existingIndexes[$indexName])) {
+                return false; // Index already exists in table
+            }
+        }
+
+        // 4. Handle DROP COLUMN
+        if (preg_match('/DROP\s+(?:COLUMN\s+)?[`"]?(\w+)[`"]?/i', $cleanQuery, $matches)) {
+            $colName = strtolower($matches[1]);
+            if (!in_array($colName, ['index', 'key', 'primary', 'foreign', 'constraint']) && !isset($existingColumns[$colName])) {
+                return false; // Column to drop does not exist
+            }
+        }
+
+        return true;
+    }
+
     /**
      * Scan and auto-create/update tables defined in child constructors
      * @param array $tables Schema configurations mapping tableName to:
@@ -53,8 +139,8 @@ class ProRepository
                     $schemaSql = $config;
                 }
 
-                // Apply global override if defined in config
-                if ($globalMode !== null && !$globalLocked) {
+                // Apply global override if defined in config, unless table explicitly declared mode
+                if ($globalMode !== null && !$globalLocked && !(is_array($config) && isset($config['mode']))) {
                     $mode = $globalMode;
                 }
 
@@ -129,8 +215,10 @@ class ProRepository
                                 if (empty(trim($sql))) continue;
                                 $res = ProSql::Query($sql);
                                 if (!$res->isSuccess()) {
+                                    $msg = $res->getMessage();
+                                    Log::error("Schema creation failed for table '{$item['table']}': {$msg} | SQL: {$sql}");
                                     $allSuccess = false;
-                                    $lastErrorMessage = $res->getMessage();
+                                    $lastErrorMessage = $msg;
                                     break;
                                 }
                             }
@@ -138,14 +226,30 @@ class ProRepository
 
                         // 2. Run alter/update queries if schema succeeded (or if only update queries queued)
                         if ($allSuccess && !empty($item['update']) && is_array($item['update'])) {
+                            $tableName = $item['table'];
+                            $existingCols = self::getExistingColumns($tableName);
+                            $existingIdxs = self::getExistingIndexes($tableName);
+
                             foreach ($item['update'] as $alterQuery) {
                                 if (empty(trim($alterQuery))) continue;
+
+                                // Pre-check schema structure before executing ALTER
+                                if (!self::shouldExecuteAlterQuery($alterQuery, $existingCols, $existingIdxs)) {
+                                    continue; // Skip already applied structural alterations
+                                }
+
                                 $res = ProSql::Query($alterQuery);
                                 if (!$res->isSuccess()) {
+                                    $msg = $res->getMessage();
+                                    Log::error("Alter query failed for table '{$tableName}': {$msg} | SQL: {$alterQuery}");
                                     $allSuccess = false;
-                                    $lastErrorMessage = $res->getMessage();
+                                    $lastErrorMessage = $msg;
                                     break;
                                 }
+
+                                // Refresh cached columns/indexes after successful structural change
+                                $existingCols = self::getExistingColumns($tableName);
+                                $existingIdxs = self::getExistingIndexes($tableName);
                             }
                         }
 
@@ -164,6 +268,7 @@ class ProRepository
                 if (!empty($createQueue)) {
                     $failedTable = $createQueue[0]['table'] ?? 'unknown';
                     $failedMsg = "Schema migration failed for table '$failedTable' after 3 attempts: " . $lastErrorMessage;
+                    Log::error($failedMsg);
                     (new DataFailed($failedMsg, 500))->response();
                 }
             }
