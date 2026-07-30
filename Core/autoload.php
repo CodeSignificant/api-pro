@@ -36,6 +36,7 @@ require_once $core . '/Http/Attributes/Patch.php';
 require_once $core . '/Http/Attributes/Delete.php';
 require_once $core . '/Http/Node.php';
 require_once $core . '/Http/Request.php';
+require_once $core . '/Http/Log.php';
 require_once $core . '/Database/ProSql.php';
 require_once $core . '/Database/ProRepository.php';
 require_once $core . '/Security/Token.php';
@@ -46,7 +47,6 @@ require_once $core . '/Security/DataEncryption.php';
 
 require_once $core . '/Http/ProNode.php';
 require_once $core . '/Http/DataResponse.php';
-require_once $core . '/Http/Log.php';
 require_once $core . '/Cache/ProRedis.php';
 require_once $core . '/Security/RateLimiter.php';
 require_once $core . '/Security/ProLock.php';
